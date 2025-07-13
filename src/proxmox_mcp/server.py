@@ -30,6 +30,7 @@ from .core.logging import setup_logging
 from .core.proxmox import ProxmoxManager
 from .tools.node import NodeTools
 from .tools.vm import VMTools
+from .tools.lxc import LXCTools
 from .tools.storage import StorageTools
 from .tools.cluster import ClusterTools
 from .tools.definitions import (
@@ -45,6 +46,22 @@ from .tools.definitions import (
     GET_VM_CONFIG_DESC,
     UPDATE_VM_CONFIG_DESC,
     GET_CONTAINERS_DESC,
+    CREATE_CONTAINER_DESC,
+    START_CONTAINER_DESC,
+    STOP_CONTAINER_DESC,
+    SHUTDOWN_CONTAINER_DESC,
+    REBOOT_CONTAINER_DESC,
+    SUSPEND_CONTAINER_DESC,
+    RESUME_CONTAINER_DESC,
+    GET_CONTAINER_CONFIG_DESC,
+    UPDATE_CONTAINER_CONFIG_DESC,
+    EXECUTE_CONTAINER_COMMAND_DESC,
+    CLONE_CONTAINER_DESC,
+    DESTROY_CONTAINER_DESC,
+    GET_CONTAINER_SNAPSHOTS_DESC,
+    CREATE_CONTAINER_SNAPSHOT_DESC,
+    DELETE_CONTAINER_SNAPSHOT_DESC,
+    ROLLBACK_CONTAINER_SNAPSHOT_DESC,
     GET_STORAGE_DESC,
     GET_CLUSTER_STATUS_DESC
 )
@@ -68,6 +85,7 @@ class ProxmoxMCPServer:
         # Initialize tools
         self.node_tools = NodeTools(self.proxmox)
         self.vm_tools = VMTools(self.proxmox)
+        self.lxc_tools = LXCTools(self.proxmox)
         self.storage_tools = StorageTools(self.proxmox)
         self.cluster_tools = ClusterTools(self.proxmox)
         
@@ -178,6 +196,150 @@ class ProxmoxMCPServer:
             command: Annotated[str, Field(description="Shell command to run (e.g. 'uname -a', 'systemctl status nginx')")]
         ):
             return await self.vm_tools.execute_command(node, vmid, command)
+
+        # LXC Container tools
+        @self.mcp.tool(description=GET_CONTAINERS_DESC)
+        def get_containers():
+            return self.lxc_tools.get_containers()
+
+        @self.mcp.tool(description=CREATE_CONTAINER_DESC)
+        def create_container(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")],
+            hostname: Annotated[str, Field(description="Container hostname (e.g. 'web-server')")],
+            template: Annotated[str, Field(description="Template to use (e.g. 'ubuntu-20.04-standard')")],
+            storage: Annotated[str, Field(description="Storage pool (e.g. 'local-lvm')")],
+            cores: Annotated[int, Field(description="CPU cores (e.g. 2)")],
+            memory: Annotated[int, Field(description="Memory in MB (e.g. 2048)")],
+            password: Annotated[str, Field(description="Root password for container")]
+        ):
+            return self.lxc_tools.create_container(node, vmid, hostname, template, storage, cores, memory, password)
+
+        @self.mcp.tool(description=START_CONTAINER_DESC)
+        def start_container(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")]
+        ):
+            return self.lxc_tools.start_container(node, vmid)
+
+        @self.mcp.tool(description=STOP_CONTAINER_DESC)
+        def stop_container(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")]
+        ):
+            return self.lxc_tools.stop_container(node, vmid)
+
+        @self.mcp.tool(description=SHUTDOWN_CONTAINER_DESC)
+        def shutdown_container(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")]
+        ):
+            return self.lxc_tools.shutdown_container(node, vmid)
+
+        @self.mcp.tool(description=REBOOT_CONTAINER_DESC)
+        def reboot_container(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")]
+        ):
+            return self.lxc_tools.reboot_container(node, vmid)
+
+        @self.mcp.tool(description=SUSPEND_CONTAINER_DESC)
+        def suspend_container(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")]
+        ):
+            return self.lxc_tools.suspend_container(node, vmid)
+
+        @self.mcp.tool(description=RESUME_CONTAINER_DESC)
+        def resume_container(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")]
+        ):
+            return self.lxc_tools.resume_container(node, vmid)
+
+        @self.mcp.tool(description=GET_CONTAINER_CONFIG_DESC)
+        def get_container_config(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")]
+        ):
+            return self.lxc_tools.get_container_config(node, vmid)
+
+        @self.mcp.tool(description=UPDATE_CONTAINER_CONFIG_DESC)
+        def update_container_config(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")],
+            cores: Annotated[Optional[int], Field(description="CPU cores (e.g. 4)")] = None,
+            memory: Annotated[Optional[int], Field(description="Memory in MB (e.g. 4096)")] = None,
+            hostname: Annotated[Optional[str], Field(description="Container hostname (e.g. 'new-hostname')")] = None,
+            description: Annotated[Optional[str], Field(description="Container description")] = None
+        ):
+            config_params = {}
+            if cores is not None:
+                config_params['cores'] = cores
+            if memory is not None:
+                config_params['memory'] = memory
+            if hostname is not None:
+                config_params['hostname'] = hostname
+            if description is not None:
+                config_params['description'] = description
+            return self.lxc_tools.update_container_config(node, vmid, **config_params)
+
+        @self.mcp.tool(description=EXECUTE_CONTAINER_COMMAND_DESC)
+        async def execute_container_command(
+            node: Annotated[str, Field(description="Host node name (e.g. 'pve1', 'proxmox-node2')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200', '201')")],
+            command: Annotated[str, Field(description="Shell command to run (e.g. 'uname -a', 'systemctl status nginx')")]
+        ):
+            return await self.lxc_tools.execute_command(node, vmid, command)
+
+        @self.mcp.tool(description=CLONE_CONTAINER_DESC)
+        def clone_container(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Source container ID (e.g. '200')")],
+            newid: Annotated[str, Field(description="New container ID (e.g. '201')")],
+            name: Annotated[str, Field(description="New container name (e.g. 'web-server-clone')")],
+            storage: Annotated[str, Field(description="Storage pool for clone (e.g. 'local-lvm')")]
+        ):
+            return self.lxc_tools.clone_container(node, vmid, newid, name, storage)
+
+        @self.mcp.tool(description=DESTROY_CONTAINER_DESC)
+        def destroy_container(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")]
+        ):
+            return self.lxc_tools.destroy_container(node, vmid)
+
+        @self.mcp.tool(description=GET_CONTAINER_SNAPSHOTS_DESC)
+        def get_container_snapshots(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")]
+        ):
+            return self.lxc_tools.get_container_snapshots(node, vmid)
+
+        @self.mcp.tool(description=CREATE_CONTAINER_SNAPSHOT_DESC)
+        def create_container_snapshot(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")],
+            snapname: Annotated[str, Field(description="Snapshot name (e.g. 'backup-2024-01-01')")],
+            description: Annotated[Optional[str], Field(description="Snapshot description")] = None
+        ):
+            return self.lxc_tools.create_container_snapshot(node, vmid, snapname, description)
+
+        @self.mcp.tool(description=DELETE_CONTAINER_SNAPSHOT_DESC)
+        def delete_container_snapshot(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")],
+            snapname: Annotated[str, Field(description="Snapshot name (e.g. 'backup-2024-01-01')")]
+        ):
+            return self.lxc_tools.delete_container_snapshot(node, vmid, snapname)
+
+        @self.mcp.tool(description=ROLLBACK_CONTAINER_SNAPSHOT_DESC)
+        def rollback_container_snapshot(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="Container ID number (e.g. '200')")],
+            snapname: Annotated[str, Field(description="Snapshot name (e.g. 'backup-2024-01-01')")]
+        ):
+            return self.lxc_tools.rollback_container_snapshot(node, vmid, snapname)
 
         # Storage tools
         @self.mcp.tool(description=GET_STORAGE_DESC)

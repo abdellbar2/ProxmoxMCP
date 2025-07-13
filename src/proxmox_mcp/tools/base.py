@@ -88,6 +88,30 @@ class ProxmoxTool:
                 formatted = ProxmoxTemplates.vm_config_result(*data)
             else:
                 formatted = ProxmoxTemplates.vm_config_result(False, "unknown", "unknown", None, str(data))
+        elif resource_type == "container_creation":
+            # For container_creation, data should be a tuple of (success, vmid, node, hostname, template, cores, memory, storage, error)
+            if isinstance(data, tuple) and len(data) >= 8:
+                formatted = ProxmoxTemplates.container_creation_result(*data)
+            else:
+                formatted = ProxmoxTemplates.container_creation_result(False, "unknown", "unknown", "unknown", "unknown", 0, 0, "unknown", str(data))
+        elif resource_type == "container_power":
+            # For container_power, data should be a tuple of (operation, success, vmid, node, status, error)
+            if isinstance(data, tuple) and len(data) >= 5:
+                formatted = ProxmoxTemplates.container_power_operation(*data)
+            else:
+                formatted = ProxmoxTemplates.container_power_operation("unknown", False, "unknown", "unknown", "unknown", str(data))
+        elif resource_type == "container_config":
+            # For container_config, data should be a tuple of (success, vmid, node, config, error)
+            if isinstance(data, tuple) and len(data) >= 3:
+                formatted = ProxmoxTemplates.container_config_result(*data)
+            else:
+                formatted = ProxmoxTemplates.container_config_result(False, "unknown", "unknown", None, str(data))
+        elif resource_type == "container_snapshot":
+            # For container_snapshot, data should be a tuple of (success, vmid, node, snapname, operation, error)
+            if isinstance(data, tuple) and len(data) >= 5:
+                formatted = ProxmoxTemplates.container_snapshot_result(*data)
+            else:
+                formatted = ProxmoxTemplates.container_snapshot_result(False, "unknown", "unknown", "unknown", "unknown", str(data))
         else:
             # Fallback to JSON formatting for unknown types
             import json

@@ -353,3 +353,193 @@ class ProxmoxTemplates:
             ]
         
         return "\n".join(result)
+
+    @staticmethod
+    def container_creation_result(success: bool, vmid: str, node: str, hostname: str, 
+                                 template: str, cores: int, memory: int, storage: str, 
+                                 error: str = "") -> str:
+        """Template for container creation result output.
+        
+        Args:
+            success: Whether container creation succeeded
+            vmid: Container ID
+            node: Target node
+            hostname: Container hostname
+            template: Template used
+            cores: CPU cores
+            memory: Memory in MB
+            storage: Storage pool
+            error: Error message if creation failed
+            
+        Returns:
+            Formatted container creation result string
+        """
+        if success:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['success']} Container Created Successfully",
+                "",
+                f"{ProxmoxTheme.RESOURCES['container']} {hostname} (ID: {vmid})",
+                f"  • Node: {node}",
+                f"  • Template: {template}",
+                f"  • CPU Cores: {cores}",
+                f"  • Memory: {memory} MB",
+                f"  • Storage: {storage}",
+                "",
+                f"{ProxmoxTheme.ACTIONS['info']} Container is ready for startup"
+            ]
+        else:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['error']} Container Creation Failed",
+                "",
+                f"  • Container Hostname: {hostname}",
+                f"  • Target Node: {node}",
+                f"  • Error: {error or 'Unknown error'}"
+            ]
+        
+        return "\n".join(result)
+
+    @staticmethod
+    def container_power_operation(operation: str, success: bool, vmid: str, node: str, 
+                                 status: str, error: str = "") -> str:
+        """Template for container power operation results.
+        
+        Args:
+            operation: Type of operation (start, stop, shutdown, reboot, suspend, resume)
+            success: Whether operation succeeded
+            vmid: Container ID
+            node: Target node
+            status: Container status after operation
+            error: Error message if operation failed
+            
+        Returns:
+            Formatted container power operation result string
+        """
+        operation_emoji = {
+            'start': ProxmoxTheme.ACTIONS['start'],
+            'stop': ProxmoxTheme.ACTIONS['stop'],
+            'shutdown': ProxmoxTheme.ACTIONS['stop'],
+            'reboot': ProxmoxTheme.ACTIONS['restart'],
+            'suspend': ProxmoxTheme.ACTIONS['lock'],
+            'resume': ProxmoxTheme.ACTIONS['unlock']
+        }.get(operation.lower(), ProxmoxTheme.ACTIONS['info'])
+        
+        if success:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['success']} Container {operation.title()} Successful",
+                "",
+                f"{ProxmoxTheme.RESOURCES['container']} Container {vmid}",
+                f"  • Node: {node}",
+                f"  • Operation: {operation.title()}",
+                f"  • Status: {status.upper()}",
+                "",
+                f"{operation_emoji} Container is now {status}"
+            ]
+        else:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['error']} Container {operation.title()} Failed",
+                "",
+                f"  • Container ID: {vmid}",
+                f"  • Target Node: {node}",
+                f"  • Operation: {operation.title()}",
+                f"  • Error: {error or 'Unknown error'}"
+            ]
+        
+        return "\n".join(result)
+
+    @staticmethod
+    def container_config_result(success: bool, vmid: str, node: str, config: Dict[str, Any] = None, 
+                               error: str = "") -> str:
+        """Template for container configuration operation results.
+        
+        Args:
+            success: Whether operation succeeded
+            vmid: Container ID
+            node: Target node
+            config: Container configuration data
+            error: Error message if operation failed
+            
+        Returns:
+            Formatted container configuration result string
+        """
+        if success and config:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['success']} Container Configuration Retrieved",
+                "",
+                f"{ProxmoxTheme.RESOURCES['container']} Container {vmid}",
+                f"  • Node: {node}",
+                f"  • Hostname: {config.get('hostname', 'N/A')}",
+                f"  • CPU Cores: {config.get('cores', 'N/A')}",
+                f"  • Memory: {config.get('memory', 'N/A')} MB",
+                f"  • Template: {config.get('template', 'N/A')}",
+                f"  • Status: {config.get('status', 'N/A')}"
+            ]
+            
+            # Add additional configuration details if available
+            if config.get('description'):
+                result.append(f"  • Description: {config['description']}")
+            if config.get('arch'):
+                result.append(f"  • Architecture: {config['arch']}")
+        elif success:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['success']} Container Configuration Updated",
+                "",
+                f"{ProxmoxTheme.RESOURCES['container']} Container {vmid}",
+                f"  • Node: {node}",
+                f"  • Status: Configuration updated successfully"
+            ]
+        else:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['error']} Container Configuration Operation Failed",
+                "",
+                f"  • Container ID: {vmid}",
+                f"  • Target Node: {node}",
+                f"  • Error: {error or 'Unknown error'}"
+            ]
+        
+        return "\n".join(result)
+
+    @staticmethod
+    def container_snapshot_result(success: bool, vmid: str, node: str, snapname: str, 
+                                 operation: str, error: str = "") -> str:
+        """Template for container snapshot operation results.
+        
+        Args:
+            success: Whether operation succeeded
+            vmid: Container ID
+            node: Target node
+            snapname: Snapshot name
+            operation: Type of operation (create, delete, rollback)
+            error: Error message if operation failed
+            
+        Returns:
+            Formatted container snapshot result string
+        """
+        operation_emoji = {
+            'create': ProxmoxTheme.ACTIONS['create'],
+            'delete': ProxmoxTheme.ACTIONS['delete'],
+            'rollback': ProxmoxTheme.ACTIONS['restart']
+        }.get(operation.lower(), ProxmoxTheme.ACTIONS['info'])
+        
+        if success:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['success']} Container Snapshot {operation.title()} Successful",
+                "",
+                f"{ProxmoxTheme.RESOURCES['snapshot']} Snapshot: {snapname}",
+                f"  • Container ID: {vmid}",
+                f"  • Node: {node}",
+                f"  • Operation: {operation.title()}",
+                "",
+                f"{operation_emoji} Snapshot {operation} completed"
+            ]
+        else:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['error']} Container Snapshot {operation.title()} Failed",
+                "",
+                f"  • Snapshot: {snapname}",
+                f"  • Container ID: {vmid}",
+                f"  • Target Node: {node}",
+                f"  • Operation: {operation.title()}",
+                f"  • Error: {error or 'Unknown error'}"
+            ]
+        
+        return "\n".join(result)

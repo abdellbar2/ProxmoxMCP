@@ -56,6 +56,76 @@ class VMConfigUpdate(BaseModel):
     name: Optional[str] = Field(None, description="VM name (e.g. 'ubuntu-server')")
     description: Optional[str] = Field(None, description="VM description")
 
+class ContainerCommand(BaseModel):
+    """Model for container command execution parameters.
+    
+    Validates and documents the required parameters for
+    executing commands within an LXC container.
+    """
+    node: Annotated[str, Field(description="Host node name (e.g. 'pve1', 'proxmox-node2')")]
+    vmid: Annotated[str, Field(description="Container ID number (e.g. '200', '201')")]
+    command: Annotated[str, Field(description="Shell command to run (e.g. 'uname -a', 'systemctl status nginx')")]
+
+class ContainerPowerOperation(BaseModel):
+    """Model for container power operation parameters.
+    
+    Validates and documents the required parameters for
+    container power operations (start, stop, shutdown, reboot, suspend, resume).
+    """
+    node: Annotated[str, Field(description="Target node name (e.g. 'pve1', 'proxmox-node2')")]
+    vmid: Annotated[str, Field(description="Container ID number (e.g. '200', '201')")]
+
+class ContainerConfigUpdate(BaseModel):
+    """Model for container configuration update parameters.
+    
+    Validates and documents the parameters for
+    updating container configuration settings.
+    """
+    node: Annotated[str, Field(description="Target node name (e.g. 'pve1', 'proxmox-node2')")]
+    vmid: Annotated[str, Field(description="Container ID number (e.g. '200', '201')")]
+    cores: Optional[int] = Field(None, description="CPU cores (e.g. 2, 4, 8)")
+    memory: Optional[int] = Field(None, description="Memory in MB (e.g. 2048, 4096)")
+    hostname: Optional[str] = Field(None, description="Container hostname (e.g. 'web-server')")
+    description: Optional[str] = Field(None, description="Container description")
+
+class ContainerCreation(BaseModel):
+    """Model for container creation parameters.
+    
+    Validates and documents the required parameters for
+    creating new LXC containers.
+    """
+    node: Annotated[str, Field(description="Target node name (e.g. 'pve1', 'proxmox-node2')")]
+    vmid: Annotated[str, Field(description="Container ID number (e.g. '200', '201')")]
+    hostname: Annotated[str, Field(description="Container hostname (e.g. 'web-server')")]
+    template: Annotated[str, Field(description="Template to use (e.g. 'ubuntu-20.04-standard')")]
+    storage: Annotated[str, Field(description="Storage pool (e.g. 'local-lvm')")]
+    cores: Annotated[int, Field(description="CPU cores (e.g. 2, 4, 8)")]
+    memory: Annotated[int, Field(description="Memory in MB (e.g. 2048, 4096)")]
+    password: Annotated[str, Field(description="Root password for container")]
+
+class ContainerClone(BaseModel):
+    """Model for container cloning parameters.
+    
+    Validates and documents the required parameters for
+    cloning existing LXC containers.
+    """
+    node: Annotated[str, Field(description="Target node name (e.g. 'pve1', 'proxmox-node2')")]
+    vmid: Annotated[str, Field(description="Source container ID (e.g. '200', '201')")]
+    newid: Annotated[str, Field(description="New container ID (e.g. '201', '202')")]
+    name: Annotated[str, Field(description="New container name (e.g. 'web-server-clone')")]
+    storage: Annotated[str, Field(description="Storage pool for clone (e.g. 'local-lvm')")]
+
+class ContainerSnapshot(BaseModel):
+    """Model for container snapshot parameters.
+    
+    Validates and documents the required parameters for
+    container snapshot operations.
+    """
+    node: Annotated[str, Field(description="Target node name (e.g. 'pve1', 'proxmox-node2')")]
+    vmid: Annotated[str, Field(description="Container ID number (e.g. '200', '201')")]
+    snapname: Annotated[str, Field(description="Snapshot name (e.g. 'backup-2024-01-01')")]
+    description: Optional[str] = Field(None, description="Snapshot description")
+
 class ProxmoxConfig(BaseModel):
     """Model for Proxmox connection configuration.
     

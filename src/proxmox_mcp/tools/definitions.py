@@ -109,6 +109,168 @@ GET_CONTAINERS_DESC = """List all LXC containers across the cluster with their s
 Example:
 {"vmid": "200", "name": "nginx", "status": "running", "template": "ubuntu-20.04"}"""
 
+CREATE_CONTAINER_DESC = """Create a new LXC container on a Proxmox node.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+hostname* - Container hostname (e.g. 'web-server')
+template* - Template to use (e.g. 'ubuntu-20.04-standard')
+storage* - Storage pool (e.g. 'local-lvm')
+cores* - CPU cores (e.g. 2)
+memory* - Memory in MB (e.g. 2048)
+password* - Root password for container
+
+Example:
+{"success": true, "vmid": "200", "node": "pve1"}"""
+
+START_CONTAINER_DESC = """Start an LXC container.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+
+Example:
+{"success": true, "vmid": "200", "status": "running"}"""
+
+STOP_CONTAINER_DESC = """Stop an LXC container.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+
+Example:
+{"success": true, "vmid": "200", "status": "stopped"}"""
+
+SHUTDOWN_CONTAINER_DESC = """Shutdown an LXC container gracefully.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+
+Example:
+{"success": true, "vmid": "200", "status": "stopped"}"""
+
+REBOOT_CONTAINER_DESC = """Reboot an LXC container.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+
+Example:
+{"success": true, "vmid": "200", "status": "running"}"""
+
+SUSPEND_CONTAINER_DESC = """Suspend an LXC container.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+
+Example:
+{"success": true, "vmid": "200", "status": "suspended"}"""
+
+RESUME_CONTAINER_DESC = """Resume a suspended LXC container.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+
+Example:
+{"success": true, "vmid": "200", "status": "running"}"""
+
+GET_CONTAINER_CONFIG_DESC = """Get LXC container configuration.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+
+Example:
+{"vmid": "200", "hostname": "web-server", "cores": 2, "memory": 2048}"""
+
+UPDATE_CONTAINER_CONFIG_DESC = """Update LXC container configuration.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+cores - CPU cores (e.g. 4)
+memory - Memory in MB (e.g. 4096)
+hostname - Container hostname (e.g. 'new-hostname')
+description - Container description
+
+Example:
+{"success": true, "vmid": "200", "message": "Configuration updated"}"""
+
+EXECUTE_CONTAINER_COMMAND_DESC = """Execute commands in an LXC container.
+
+Parameters:
+node* - Host node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+command* - Shell command to run (e.g. 'uname -a')
+
+Example:
+{"success": true, "output": "Linux container1 5.4.0", "exit_code": 0}"""
+
+CLONE_CONTAINER_DESC = """Clone an existing LXC container.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Source container ID (e.g. '200')
+newid* - New container ID (e.g. '201')
+name* - New container name (e.g. 'web-server-clone')
+storage* - Storage pool for clone (e.g. 'local-lvm')
+
+Example:
+{"success": true, "newid": "201", "name": "web-server-clone"}"""
+
+DESTROY_CONTAINER_DESC = """Destroy an LXC container.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+
+Example:
+{"success": true, "vmid": "200", "message": "Container destroyed"}"""
+
+GET_CONTAINER_SNAPSHOTS_DESC = """Get LXC container snapshots.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+
+Example:
+{"snapshots": [{"name": "backup1", "time": "2024-01-01T12:00:00Z"}]}"""
+
+CREATE_CONTAINER_SNAPSHOT_DESC = """Create a snapshot of an LXC container.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+snapname* - Snapshot name (e.g. 'backup-2024-01-01')
+description - Snapshot description
+
+Example:
+{"success": true, "snapname": "backup-2024-01-01"}"""
+
+DELETE_CONTAINER_SNAPSHOT_DESC = """Delete a container snapshot.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+snapname* - Snapshot name (e.g. 'backup-2024-01-01')
+
+Example:
+{"success": true, "snapname": "backup-2024-01-01"}"""
+
+ROLLBACK_CONTAINER_SNAPSHOT_DESC = """Rollback container to a snapshot.
+
+Parameters:
+node* - Target node name (e.g. 'pve1')
+vmid* - Container ID number (e.g. '200')
+snapname* - Snapshot name (e.g. 'backup-2024-01-01')
+
+Example:
+{"success": true, "snapname": "backup-2024-01-01"}"""
+
 # Storage tool descriptions
 GET_STORAGE_DESC = """List storage pools across the cluster with their usage and configuration.
 
