@@ -16,7 +16,11 @@ detailed VM information might be temporarily unavailable.
 from typing import List
 from mcp.types import TextContent as Content
 from .base import ProxmoxTool
-from .definitions import GET_VMS_DESC, EXECUTE_VM_COMMAND_DESC
+from .definitions import (
+    GET_VMS_DESC, EXECUTE_VM_COMMAND_DESC, CREATE_VM_DESC,
+    START_VM_DESC, STOP_VM_DESC, SHUTDOWN_VM_DESC, REBOOT_VM_DESC,
+    GET_VM_CONFIG_DESC, UPDATE_VM_CONFIG_DESC
+)
 from .console.manager import VMConsoleManager
 
 class VMTools(ProxmoxTool):
@@ -25,6 +29,7 @@ class VMTools(ProxmoxTool):
     Provides functionality for:
     - Retrieving cluster-wide VM information
     - Getting detailed VM status and configuration
+    - Creating new virtual machines
     - Executing commands within VMs
     - Managing VM console operations
     
@@ -110,6 +115,307 @@ class VMTools(ProxmoxTool):
             return self._format_response(result, "vms")
         except Exception as e:
             self._handle_error("get VMs", e)
+
+    def create_vm(self, node: str, vmid: str, name: str, cores: int, 
+                  memory: int, storage: str, ostype: str) -> List[Content]:
+        """Create a new virtual machine on a Proxmox node.
+
+        Creates a new VM with the specified configuration including:
+        - Basic VM settings (name, ID, OS type)
+        - Resource allocation (CPU cores, memory)
+        - Storage configuration (disk on specified storage pool)
+        - Network configuration (default bridge)
+
+        Args:
+            node: Target node name (e.g., 'pve1', 'proxmox-node2')
+            vmid: VM ID number (e.g., '100', '101')
+            name: VM name (e.g., 'ubuntu-server', 'web-app')
+            cores: CPU cores (e.g., 2, 4, 8)
+            memory: Memory in MB (e.g., 2048, 4096, 8192)
+            storage: Storage pool (e.g., 'local-lvm', 'ceph-prod')
+            ostype: OS type (e.g., 'l26', 'win10', 'other')
+
+        Returns:
+            List of Content objects containing formatted creation result:
+            {
+                "success": true/false,
+                "vmid": "100",
+                "node": "pve1",
+                "message": "VM created successfully"
+            }
+
+        Raises:
+            ValueError: If VM ID already exists, invalid parameters, or storage not found
+            RuntimeError: If VM creation fails due to API errors or insufficient resources
+        """
+        try:
+            # Check if VM ID already exists
+            try:
+                existing_vms = self.proxmox.nodes(node).qemu.get()
+                for vm in existing_vms:
+                    if str(vm["vmid"]) == str(vmid):
+                        raise ValueError(f"VM ID {vmid} already exists on node {node}")
+            except Exception as e:
+                if "not found" not in str(e).lower():
+                    raise
+
+            # Prepare VM configuration
+            config = {
+                'vmid': vmid,
+                'name': name,
+                'cores': cores,
+                'memory': memory,
+                'ostype': ostype,
+                'sata0': f'{storage}:32',  # 32GB disk
+                'net0': 'virtio,bridge=vmbr0'
+            }
+            
+            self.logger.info(f"Creating VM {name} (ID: {vmid}) on node {node}")
+            
+            # Create VM using Proxmox API
+            result = self.proxmox.nodes(node).qemu.post(**config)
+            
+            # Format response
+            from ..formatting import ProxmoxTemplates
+            formatted = ProxmoxTemplates.vm_creation_result(
+                success=True,
+                vmid=vmid,
+                node=node,
+                name=name,
+                cores=cores,
+                memory=memory,
+                storage=storage,
+                ostype=ostype
+            )
+            
+            return [Content(type="text", text=formatted)]
+        except ValueError:
+            # Re-raise ValueError for validation errors
+            raise
+        except Exception as e:
+            self._handle_error(f"create VM {name} on node {node}", e)
+
+    def start_vm(self, node: str, vmid: str) -> List[Content]:
+        """Start a virtual machine.
+
+        Args:
+            node: Target node name (e.g., 'pve1', 'proxmox-node2')
+            vmid: VM ID number (e.g., '100', '101')
+
+        Returns:
+            List of Content objects containing formatted start result
+
+        Raises:
+            ValueError: If VM is not found or already running
+            RuntimeError: If VM start fails due to API errors
+        """
+        try:
+            self.logger.info(f"Starting VM {vmid} on node {node}")
+            
+            # Start VM using Proxmox API
+            result = self.proxmox.nodes(node).qemu(vmid).status.start.post()
+            
+            # Get updated VM status
+            vm_status = self.proxmox.nodes(node).qemu(vmid).status.current.get()
+            status = vm_status.get("status", "unknown")
+            
+            # Format response
+            from ..formatting import ProxmoxTemplates
+            formatted = ProxmoxTemplates.vm_power_operation(
+                operation="start",
+                success=True,
+                vmid=vmid,
+                node=node,
+                status=status
+            )
+            
+            return [Content(type="text", text=formatted)]
+        except Exception as e:
+            self._handle_error(f"start VM {vmid} on node {node}", e)
+
+    def stop_vm(self, node: str, vmid: str) -> List[Content]:
+        """Stop a virtual machine.
+
+        Args:
+            node: Target node name (e.g., 'pve1', 'proxmox-node2')
+            vmid: VM ID number (e.g., '100', '101')
+
+        Returns:
+            List of Content objects containing formatted stop result
+
+        Raises:
+            ValueError: If VM is not found or already stopped
+            RuntimeError: If VM stop fails due to API errors
+        """
+        try:
+            self.logger.info(f"Stopping VM {vmid} on node {node}")
+            
+            # Stop VM using Proxmox API
+            result = self.proxmox.nodes(node).qemu(vmid).status.stop.post()
+            
+            # Get updated VM status
+            vm_status = self.proxmox.nodes(node).qemu(vmid).status.current.get()
+            status = vm_status.get("status", "unknown")
+            
+            # Format response
+            from ..formatting import ProxmoxTemplates
+            formatted = ProxmoxTemplates.vm_power_operation(
+                operation="stop",
+                success=True,
+                vmid=vmid,
+                node=node,
+                status=status
+            )
+            
+            return [Content(type="text", text=formatted)]
+        except Exception as e:
+            self._handle_error(f"stop VM {vmid} on node {node}", e)
+
+    def shutdown_vm(self, node: str, vmid: str) -> List[Content]:
+        """Shutdown a virtual machine gracefully.
+
+        Args:
+            node: Target node name (e.g., 'pve1', 'proxmox-node2')
+            vmid: VM ID number (e.g., '100', '101')
+
+        Returns:
+            List of Content objects containing formatted shutdown result
+
+        Raises:
+            ValueError: If VM is not found or already stopped
+            RuntimeError: If VM shutdown fails due to API errors
+        """
+        try:
+            self.logger.info(f"Shutting down VM {vmid} on node {node}")
+            
+            # Shutdown VM using Proxmox API
+            result = self.proxmox.nodes(node).qemu(vmid).status.shutdown.post()
+            
+            # Get updated VM status
+            vm_status = self.proxmox.nodes(node).qemu(vmid).status.current.get()
+            status = vm_status.get("status", "unknown")
+            
+            # Format response
+            from ..formatting import ProxmoxTemplates
+            formatted = ProxmoxTemplates.vm_power_operation(
+                operation="shutdown",
+                success=True,
+                vmid=vmid,
+                node=node,
+                status=status
+            )
+            
+            return [Content(type="text", text=formatted)]
+        except Exception as e:
+            self._handle_error(f"shutdown VM {vmid} on node {node}", e)
+
+    def reboot_vm(self, node: str, vmid: str) -> List[Content]:
+        """Reboot a virtual machine.
+
+        Args:
+            node: Target node name (e.g., 'pve1', 'proxmox-node2')
+            vmid: VM ID number (e.g., '100', '101')
+
+        Returns:
+            List of Content objects containing formatted reboot result
+
+        Raises:
+            ValueError: If VM is not found or not running
+            RuntimeError: If VM reboot fails due to API errors
+        """
+        try:
+            self.logger.info(f"Rebooting VM {vmid} on node {node}")
+            
+            # Reboot VM using Proxmox API
+            result = self.proxmox.nodes(node).qemu(vmid).status.reset.post()
+            
+            # Get updated VM status
+            vm_status = self.proxmox.nodes(node).qemu(vmid).status.current.get()
+            status = vm_status.get("status", "unknown")
+            
+            # Format response
+            from ..formatting import ProxmoxTemplates
+            formatted = ProxmoxTemplates.vm_power_operation(
+                operation="reboot",
+                success=True,
+                vmid=vmid,
+                node=node,
+                status=status
+            )
+            
+            return [Content(type="text", text=formatted)]
+        except Exception as e:
+            self._handle_error(f"reboot VM {vmid} on node {node}", e)
+
+    def get_vm_config(self, node: str, vmid: str) -> List[Content]:
+        """Get virtual machine configuration.
+
+        Args:
+            node: Target node name (e.g., 'pve1', 'proxmox-node2')
+            vmid: VM ID number (e.g., '100', '101')
+
+        Returns:
+            List of Content objects containing formatted VM configuration
+
+        Raises:
+            ValueError: If VM is not found
+            RuntimeError: If configuration retrieval fails
+        """
+        try:
+            self.logger.info(f"Getting configuration for VM {vmid} on node {node}")
+            
+            # Get VM configuration using Proxmox API
+            config = self.proxmox.nodes(node).qemu(vmid).config.get()
+            
+            # Get VM status for additional info
+            vm_status = self.proxmox.nodes(node).qemu(vmid).status.current.get()
+            config['status'] = vm_status.get("status", "unknown")
+            
+            # Format response
+            from ..formatting import ProxmoxTemplates
+            formatted = ProxmoxTemplates.vm_config_result(
+                success=True,
+                vmid=vmid,
+                node=node,
+                config=config
+            )
+            
+            return [Content(type="text", text=formatted)]
+        except Exception as e:
+            self._handle_error(f"get configuration for VM {vmid} on node {node}", e)
+
+    def update_vm_config(self, node: str, vmid: str, **config_params) -> List[Content]:
+        """Update virtual machine configuration.
+
+        Args:
+            node: Target node name (e.g., 'pve1', 'proxmox-node2')
+            vmid: VM ID number (e.g., '100', '101')
+            **config_params: Configuration parameters to update
+
+        Returns:
+            List of Content objects containing formatted update result
+
+        Raises:
+            ValueError: If VM is not found or invalid parameters
+            RuntimeError: If configuration update fails
+        """
+        try:
+            self.logger.info(f"Updating configuration for VM {vmid} on node {node}")
+            
+            # Update VM configuration using Proxmox API
+            result = self.proxmox.nodes(node).qemu(vmid).config.put(**config_params)
+            
+            # Format response
+            from ..formatting import ProxmoxTemplates
+            formatted = ProxmoxTemplates.vm_config_result(
+                success=True,
+                vmid=vmid,
+                node=node
+            )
+            
+            return [Content(type="text", text=formatted)]
+        except Exception as e:
+            self._handle_error(f"update configuration for VM {vmid} on node {node}", e)
 
     async def execute_command(self, node: str, vmid: str, command: str) -> List[Content]:
         """Execute a command in a VM via QEMU guest agent.

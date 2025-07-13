@@ -37,6 +37,13 @@ from .tools.definitions import (
     GET_NODE_STATUS_DESC,
     GET_VMS_DESC,
     EXECUTE_VM_COMMAND_DESC,
+    CREATE_VM_DESC,
+    START_VM_DESC,
+    STOP_VM_DESC,
+    SHUTDOWN_VM_DESC,
+    REBOOT_VM_DESC,
+    GET_VM_CONFIG_DESC,
+    UPDATE_VM_CONFIG_DESC,
     GET_CONTAINERS_DESC,
     GET_STORAGE_DESC,
     GET_CLUSTER_STATUS_DESC
@@ -96,6 +103,73 @@ class ProxmoxMCPServer:
         @self.mcp.tool(description=GET_VMS_DESC)
         def get_vms():
             return self.vm_tools.get_vms()
+
+        @self.mcp.tool(description=CREATE_VM_DESC)
+        def create_vm(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="VM ID number (e.g. '100')")],
+            name: Annotated[str, Field(description="VM name (e.g. 'ubuntu-server')")],
+            cores: Annotated[int, Field(description="CPU cores (e.g. 2)")],
+            memory: Annotated[int, Field(description="Memory in MB (e.g. 2048)")],
+            storage: Annotated[str, Field(description="Storage pool (e.g. 'local-lvm')")],
+            ostype: Annotated[str, Field(description="OS type (e.g. 'l26', 'win10')")]
+        ):
+            return self.vm_tools.create_vm(node, vmid, name, cores, memory, storage, ostype)
+
+        @self.mcp.tool(description=START_VM_DESC)
+        def start_vm(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="VM ID number (e.g. '100')")]
+        ):
+            return self.vm_tools.start_vm(node, vmid)
+
+        @self.mcp.tool(description=STOP_VM_DESC)
+        def stop_vm(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="VM ID number (e.g. '100')")]
+        ):
+            return self.vm_tools.stop_vm(node, vmid)
+
+        @self.mcp.tool(description=SHUTDOWN_VM_DESC)
+        def shutdown_vm(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="VM ID number (e.g. '100')")]
+        ):
+            return self.vm_tools.shutdown_vm(node, vmid)
+
+        @self.mcp.tool(description=REBOOT_VM_DESC)
+        def reboot_vm(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="VM ID number (e.g. '100')")]
+        ):
+            return self.vm_tools.reboot_vm(node, vmid)
+
+        @self.mcp.tool(description=GET_VM_CONFIG_DESC)
+        def get_vm_config(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="VM ID number (e.g. '100')")]
+        ):
+            return self.vm_tools.get_vm_config(node, vmid)
+
+        @self.mcp.tool(description=UPDATE_VM_CONFIG_DESC)
+        def update_vm_config(
+            node: Annotated[str, Field(description="Target node name (e.g. 'pve1')")],
+            vmid: Annotated[str, Field(description="VM ID number (e.g. '100')")],
+            cores: Annotated[Optional[int], Field(description="CPU cores (e.g. 4)")] = None,
+            memory: Annotated[Optional[int], Field(description="Memory in MB (e.g. 4096)")] = None,
+            name: Annotated[Optional[str], Field(description="VM name (e.g. 'new-name')")] = None,
+            description: Annotated[Optional[str], Field(description="VM description")] = None
+        ):
+            config_params = {}
+            if cores is not None:
+                config_params['cores'] = cores
+            if memory is not None:
+                config_params['memory'] = memory
+            if name is not None:
+                config_params['name'] = name
+            if description is not None:
+                config_params['description'] = description
+            return self.vm_tools.update_vm_config(node, vmid, **config_params)
 
         @self.mcp.tool(description=EXECUTE_VM_COMMAND_DESC)
         async def execute_vm_command(

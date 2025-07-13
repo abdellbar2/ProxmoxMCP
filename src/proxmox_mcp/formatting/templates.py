@@ -211,3 +211,145 @@ class ProxmoxTemplates:
             result.append(f"  • Resources: {len(resources)}")
         
         return "\n".join(result)
+
+    @staticmethod
+    def vm_creation_result(success: bool, vmid: str, node: str, name: str, 
+                          cores: int, memory: int, storage: str, ostype: str, 
+                          error: str = None) -> str:
+        """Template for VM creation result output.
+        
+        Args:
+            success: Whether VM creation succeeded
+            vmid: VM ID
+            node: Target node
+            name: VM name
+            cores: CPU cores
+            memory: Memory in MB
+            storage: Storage pool
+            ostype: OS type
+            error: Error message if creation failed
+            
+        Returns:
+            Formatted VM creation result string
+        """
+        if success:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['success']} VM Created Successfully",
+                "",
+                f"{ProxmoxTheme.RESOURCES['vm']} {name} (ID: {vmid})",
+                f"  • Node: {node}",
+                f"  • CPU Cores: {cores}",
+                f"  • Memory: {memory} MB",
+                f"  • Storage: {storage}",
+                f"  • OS Type: {ostype}",
+                "",
+                f"{ProxmoxTheme.ACTIONS['info']} VM is ready for configuration and startup"
+            ]
+        else:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['error']} VM Creation Failed",
+                "",
+                f"  • VM Name: {name}",
+                f"  • Target Node: {node}",
+                f"  • Error: {error or 'Unknown error'}"
+            ]
+        
+        return "\n".join(result)
+
+    @staticmethod
+    def vm_power_operation(operation: str, success: bool, vmid: str, node: str, 
+                          status: str, error: str = "") -> str:
+        """Template for VM power operation results.
+        
+        Args:
+            operation: Type of operation (start, stop, shutdown, reboot)
+            success: Whether operation succeeded
+            vmid: VM ID
+            node: Target node
+            status: VM status after operation
+            error: Error message if operation failed
+            
+        Returns:
+            Formatted VM power operation result string
+        """
+        operation_emoji = {
+            'start': ProxmoxTheme.ACTIONS['start'],
+            'stop': ProxmoxTheme.ACTIONS['stop'],
+            'shutdown': ProxmoxTheme.ACTIONS['stop'],
+            'reboot': ProxmoxTheme.ACTIONS['restart']
+        }.get(operation.lower(), ProxmoxTheme.ACTIONS['info'])
+        
+        if success:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['success']} VM {operation.title()} Successful",
+                "",
+                f"{ProxmoxTheme.RESOURCES['vm']} VM {vmid}",
+                f"  • Node: {node}",
+                f"  • Operation: {operation.title()}",
+                f"  • Status: {status.upper()}",
+                "",
+                f"{operation_emoji} VM is now {status}"
+            ]
+        else:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['error']} VM {operation.title()} Failed",
+                "",
+                f"  • VM ID: {vmid}",
+                f"  • Target Node: {node}",
+                f"  • Operation: {operation.title()}",
+                f"  • Error: {error or 'Unknown error'}"
+            ]
+        
+        return "\n".join(result)
+
+    @staticmethod
+    def vm_config_result(success: bool, vmid: str, node: str, config: Dict[str, Any] = None, 
+                        error: str = "") -> str:
+        """Template for VM configuration operation results.
+        
+        Args:
+            success: Whether operation succeeded
+            vmid: VM ID
+            node: Target node
+            config: VM configuration data
+            error: Error message if operation failed
+            
+        Returns:
+            Formatted VM configuration result string
+        """
+        if success and config:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['success']} VM Configuration Retrieved",
+                "",
+                f"{ProxmoxTheme.RESOURCES['vm']} VM {vmid}",
+                f"  • Node: {node}",
+                f"  • Name: {config.get('name', 'N/A')}",
+                f"  • CPU Cores: {config.get('cores', 'N/A')}",
+                f"  • Memory: {config.get('memory', 'N/A')} MB",
+                f"  • OS Type: {config.get('ostype', 'N/A')}",
+                f"  • Status: {config.get('status', 'N/A')}"
+            ]
+            
+            # Add additional configuration details if available
+            if config.get('description'):
+                result.append(f"  • Description: {config['description']}")
+            if config.get('bootdisk'):
+                result.append(f"  • Boot Disk: {config['bootdisk']}")
+        elif success:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['success']} VM Configuration Updated",
+                "",
+                f"{ProxmoxTheme.RESOURCES['vm']} VM {vmid}",
+                f"  • Node: {node}",
+                f"  • Status: Configuration updated successfully"
+            ]
+        else:
+            result = [
+                f"{ProxmoxTheme.ACTIONS['error']} VM Configuration Operation Failed",
+                "",
+                f"  • VM ID: {vmid}",
+                f"  • Target Node: {node}",
+                f"  • Error: {error or 'Unknown error'}"
+            ]
+        
+        return "\n".join(result)

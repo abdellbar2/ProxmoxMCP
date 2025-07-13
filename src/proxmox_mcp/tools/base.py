@@ -70,6 +70,24 @@ class ProxmoxTool:
             formatted = ProxmoxTemplates.container_list(data)
         elif resource_type == "cluster":
             formatted = ProxmoxTemplates.cluster_status(data)
+        elif resource_type == "vm_creation":
+            # For vm_creation, data should be a tuple of (success, vmid, node, name, cores, memory, storage, ostype, error)
+            if isinstance(data, tuple) and len(data) >= 8:
+                formatted = ProxmoxTemplates.vm_creation_result(*data)
+            else:
+                formatted = ProxmoxTemplates.vm_creation_result(False, "unknown", "unknown", "unknown", 0, 0, "unknown", "unknown", str(data))
+        elif resource_type == "vm_power":
+            # For vm_power, data should be a tuple of (operation, success, vmid, node, status, error)
+            if isinstance(data, tuple) and len(data) >= 5:
+                formatted = ProxmoxTemplates.vm_power_operation(*data)
+            else:
+                formatted = ProxmoxTemplates.vm_power_operation("unknown", False, "unknown", "unknown", "unknown", str(data))
+        elif resource_type == "vm_config":
+            # For vm_config, data should be a tuple of (success, vmid, node, config, error)
+            if isinstance(data, tuple) and len(data) >= 3:
+                formatted = ProxmoxTemplates.vm_config_result(*data)
+            else:
+                formatted = ProxmoxTemplates.vm_config_result(False, "unknown", "unknown", None, str(data))
         else:
             # Fallback to JSON formatting for unknown types
             import json

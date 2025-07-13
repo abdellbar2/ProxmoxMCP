@@ -1,0 +1,3702 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "info": {
+            "GET": {
+              "allowtoken": 1,
+              "description": "Get container configuration.",
+              "method": "GET",
+              "name": "vm_config",
+              "parameters": {
+                "additionalProperties": 0,
+                "properties": {
+                  "current": {
+                    "default": 0,
+                    "description": "Get current values (instead of pending values).",
+                    "optional": 1,
+                    "type": "boolean",
+                    "typetext": "<boolean>"
+                  },
+                  "node": {
+                    "description": "The cluster node name.",
+                    "format": "pve-node",
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "snapshot": {
+                    "description": "Fetch config values from given snapshot.",
+                    "format": "pve-configid",
+                    "maxLength": 40,
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "vmid": {
+                    "description": "The (unique) ID of the VM.",
+                    "format": "pve-vmid",
+                    "maximum": 999999999,
+                    "minimum": 100,
+                    "type": "integer",
+                    "typetext": "<integer> (100 - 999999999)"
+                  }
+                }
+              },
+              "permissions": {
+                "check": [
+                  "perm",
+                  "/vms/{vmid}",
+                  [
+                    "VM.Audit"
+                  ]
+                ]
+              },
+              "proxyto": "node",
+              "returns": {
+                "properties": {
+                  "arch": {
+                    "default": "amd64",
+                    "description": "OS architecture type.",
+                    "enum": [
+                      "amd64",
+                      "i386",
+                      "arm64",
+                      "armhf",
+                      "riscv32",
+                      "riscv64"
+                    ],
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "cmode": {
+                    "default": "tty",
+                    "description": "Console mode. By default, the console command tries to open a connection to one of the available tty devices. By setting cmode to 'console' it tries to attach to /dev/console instead. If you set cmode to 'shell', it simply invokes a shell inside the container (no login).",
+                    "enum": [
+                      "shell",
+                      "console",
+                      "tty"
+                    ],
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "console": {
+                    "default": 1,
+                    "description": "Attach a console device (/dev/console) to the container.",
+                    "optional": 1,
+                    "type": "boolean"
+                  },
+                  "cores": {
+                    "description": "The number of cores assigned to the container. A container can use all available cores by default.",
+                    "maximum": 8192,
+                    "minimum": 1,
+                    "optional": 1,
+                    "type": "integer"
+                  },
+                  "cpulimit": {
+                    "default": 0,
+                    "description": "Limit of CPU usage.\n\nNOTE: If the computer has 2 CPUs, it has a total of '2' CPU time. Value '0' indicates no CPU limit.",
+                    "maximum": 8192,
+                    "minimum": 0,
+                    "optional": 1,
+                    "type": "number"
+                  },
+                  "cpuunits": {
+                    "default": "cgroup v1: 1024, cgroup v2: 100",
+                    "description": "CPU weight for a container, will be clamped to [1, 10000] in cgroup v2.",
+                    "maximum": 500000,
+                    "minimum": 0,
+                    "optional": 1,
+                    "type": "integer",
+                    "verbose_description": "CPU weight for a container. Argument is used in the kernel fair scheduler. The larger the number is, the more CPU time this container gets. Number is relative to the weights of all the other running guests."
+                  },
+                  "debug": {
+                    "default": 0,
+                    "description": "Try to be more verbose. For now this only enables debug log-level on start.",
+                    "optional": 1,
+                    "type": "boolean"
+                  },
+                  "description": {
+                    "description": "Description for the Container. Shown in the web-interface CT's summary. This is saved as comment inside the configuration file.",
+                    "maxLength": 8192,
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "dev[n]": {
+                    "description": "Device to pass through to the container",
+                    "format": {
+                      "deny-write": {
+                        "default": 0,
+                        "description": "Deny the container to write to the device",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "gid": {
+                        "description": "Group ID to be assigned to the device node",
+                        "minimum": 0,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "mode": {
+                        "description": "Access mode to be set on the device node",
+                        "format_description": "Octal access mode",
+                        "optional": 1,
+                        "pattern": "0[0-7]{3}",
+                        "type": "string"
+                      },
+                      "path": {
+                        "default_key": 1,
+                        "description": "Device to pass through to the container",
+                        "format": "pve-lxc-dev-string",
+                        "format_description": "Path",
+                        "optional": 1,
+                        "type": "string",
+                        "verbose_description": "Path to the device to pass through to the container"
+                      },
+                      "uid": {
+                        "description": "User ID to be assigned to the device node",
+                        "minimum": 0,
+                        "optional": 1,
+                        "type": "integer"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "SHA1 digest of configuration file. This can be used to prevent concurrent modifications.",
+                    "type": "string"
+                  },
+                  "features": {
+                    "description": "Allow containers access to advanced features.",
+                    "format": {
+                      "force_rw_sys": {
+                        "default": 0,
+                        "description": "Mount /sys in unprivileged containers as `rw` instead of `mixed`. This can break networking under newer (>= v245) systemd-network use.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "fuse": {
+                        "default": 0,
+                        "description": "Allow using 'fuse' file systems in a container. Note that interactions between fuse and the freezer cgroup can potentially cause I/O deadlocks.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "keyctl": {
+                        "default": 0,
+                        "description": "For unprivileged containers only: Allow the use of the keyctl() system call. This is required to use docker inside a container. By default unprivileged containers will see this system call as non-existent. This is mostly a workaround for systemd-networkd, as it will treat it as a fatal error when some keyctl() operations are denied by the kernel due to lacking permissions. Essentially, you can choose between running systemd-networkd or docker.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "mknod": {
+                        "default": 0,
+                        "description": "Allow unprivileged containers to use mknod() to add certain device nodes. This requires a kernel with seccomp trap to user space support (5.3 or newer). This is experimental.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "mount": {
+                        "description": "Allow mounting file systems of specific types. This should be a list of file system types as used with the mount command. Note that this can have negative effects on the container's security. With access to a loop device, mounting a file can circumvent the mknod permission of the devices cgroup, mounting an NFS file system can block the host's I/O completely and prevent it from rebooting, etc.",
+                        "format_description": "fstype;fstype;...",
+                        "optional": 1,
+                        "pattern": "(?^:[a-zA-Z0-9_; ]+)",
+                        "type": "string"
+                      },
+                      "nesting": {
+                        "default": 0,
+                        "description": "Allow nesting. Best used with unprivileged containers with additional id mapping. Note that this will expose procfs and sysfs contents of the host to the guest.",
+                        "optional": 1,
+                        "type": "boolean"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "hookscript": {
+                    "description": "Script that will be executed during various steps in the containers lifetime.",
+                    "format": "pve-volume-id",
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "hostname": {
+                    "description": "Set a host name for the container.",
+                    "format": "dns-name",
+                    "maxLength": 255,
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "lock": {
+                    "description": "Lock/unlock the container.",
+                    "enum": [
+                      "backup",
+                      "create",
+                      "destroyed",
+                      "disk",
+                      "fstrim",
+                      "migrate",
+                      "mounted",
+                      "rollback",
+                      "snapshot",
+                      "snapshot-delete"
+                    ],
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "lxc": {
+                    "description": "Array of lxc low-level configurations ([[key1, value1], [key2, value2] ...]).",
+                    "items": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "optional": 1,
+                    "type": "array"
+                  },
+                  "memory": {
+                    "default": 512,
+                    "description": "Amount of RAM for the container in MB.",
+                    "minimum": 16,
+                    "optional": 1,
+                    "type": "integer"
+                  },
+                  "mp[n]": {
+                    "description": "Use volume as container mount point. Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.",
+                    "format": {
+                      "acl": {
+                        "description": "Explicitly enable or disable ACL support.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "backup": {
+                        "description": "Whether to include the mount point in backups.",
+                        "optional": 1,
+                        "type": "boolean",
+                        "verbose_description": "Whether to include the mount point in backups (only used for volume mount points)."
+                      },
+                      "mountoptions": {
+                        "description": "Extra mount options for rootfs/mps.",
+                        "format_description": "opt[;opt...]",
+                        "optional": 1,
+                        "pattern": "(?^:(?^:(discard|lazytime|noatime|nodev|noexec|nosuid))(;(?^:(discard|lazytime|noatime|nodev|noexec|nosuid)))*)",
+                        "type": "string"
+                      },
+                      "mp": {
+                        "description": "Path to the mount point as seen from inside the container (must not contain symlinks).",
+                        "format": "pve-lxc-mp-string",
+                        "format_description": "Path",
+                        "type": "string",
+                        "verbose_description": "Path to the mount point as seen from inside the container.\n\nNOTE: Must not contain any symlinks for security reasons."
+                      },
+                      "quota": {
+                        "description": "Enable user quotas inside the container (not supported with zfs subvolumes)",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "replicate": {
+                        "default": 1,
+                        "description": "Will include this volume to a storage replica job.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "ro": {
+                        "description": "Read-only mount point",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "shared": {
+                        "default": 0,
+                        "description": "Mark this non-volume mount point as available on multiple nodes (see 'nodes')",
+                        "optional": 1,
+                        "type": "boolean",
+                        "verbose_description": "Mark this non-volume mount point as available on all nodes.\n\nWARNING: This option does not share the mount point automatically, it assumes it is shared already!"
+                      },
+                      "size": {
+                        "description": "Volume size (read only value).",
+                        "format": "disk-size",
+                        "format_description": "DiskSize",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "volume": {
+                        "default_key": 1,
+                        "description": "Volume, device or directory to mount into the container.",
+                        "format": "pve-lxc-mp-string",
+                        "format_description": "volume",
+                        "type": "string"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "nameserver": {
+                    "description": "Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.",
+                    "format": "lxc-ip-with-ll-iface-list",
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "net[n]": {
+                    "description": "Specifies network interfaces for the container.",
+                    "format": {
+                      "bridge": {
+                        "description": "Bridge to attach the network device to.",
+                        "format_description": "bridge",
+                        "optional": 1,
+                        "pattern": "[-_.\\w\\d]+",
+                        "type": "string"
+                      },
+                      "firewall": {
+                        "description": "Controls whether this interface's firewall rules should be used.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "gw": {
+                        "description": "Default gateway for IPv4 traffic.",
+                        "format": "ipv4",
+                        "format_description": "GatewayIPv4",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "gw6": {
+                        "description": "Default gateway for IPv6 traffic.",
+                        "format": "ipv6",
+                        "format_description": "GatewayIPv6",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "hwaddr": {
+                        "description": "The interface MAC address. This is dynamically allocated by default, but you can set that statically if needed, for example to always have the same link-local IPv6 address. (lxc.network.hwaddr)",
+                        "format": "mac-addr",
+                        "format_description": "XX:XX:XX:XX:XX:XX",
+                        "optional": 1,
+                        "type": "string",
+                        "verbose_description": "A common MAC address with the I/G (Individual/Group) bit not set."
+                      },
+                      "ip": {
+                        "description": "IPv4 address in CIDR format.",
+                        "format": "pve-ipv4-config",
+                        "format_description": "(IPv4/CIDR|dhcp|manual)",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "ip6": {
+                        "description": "IPv6 address in CIDR format.",
+                        "format": "pve-ipv6-config",
+                        "format_description": "(IPv6/CIDR|auto|dhcp|manual)",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "link_down": {
+                        "description": "Whether this interface should be disconnected (like pulling the plug).",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "mtu": {
+                        "description": "Maximum transfer unit of the interface. (lxc.network.mtu)",
+                        "maximum": 65535,
+                        "minimum": 64,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "Name of the network device as seen from inside the container. (lxc.network.name)",
+                        "format_description": "string",
+                        "pattern": "[-_.\\w\\d]+",
+                        "type": "string"
+                      },
+                      "rate": {
+                        "description": "Apply rate limiting to the interface",
+                        "format_description": "mbps",
+                        "optional": 1,
+                        "type": "number"
+                      },
+                      "tag": {
+                        "description": "VLAN tag for this interface.",
+                        "maximum": 4094,
+                        "minimum": 1,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "trunks": {
+                        "description": "VLAN ids to pass through the interface",
+                        "format_description": "vlanid[;vlanid...]",
+                        "optional": 1,
+                        "pattern": "(?^:\\d+(?:;\\d+)*)",
+                        "type": "string"
+                      },
+                      "type": {
+                        "description": "Network interface type.",
+                        "enum": [
+                          "veth"
+                        ],
+                        "optional": 1,
+                        "type": "string"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "onboot": {
+                    "default": 0,
+                    "description": "Specifies whether a container will be started during system bootup.",
+                    "optional": 1,
+                    "type": "boolean"
+                  },
+                  "ostype": {
+                    "description": "OS type. This is used to setup configuration inside the container, and corresponds to lxc setup scripts in /usr/share/lxc/config/<ostype>.common.conf. Value 'unmanaged' can be used to skip and OS specific setup.",
+                    "enum": [
+                      "debian",
+                      "devuan",
+                      "ubuntu",
+                      "centos",
+                      "fedora",
+                      "opensuse",
+                      "archlinux",
+                      "alpine",
+                      "gentoo",
+                      "nixos",
+                      "unmanaged"
+                    ],
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "protection": {
+                    "default": 0,
+                    "description": "Sets the protection flag of the container. This will prevent the CT or CT's disk remove/update operation.",
+                    "optional": 1,
+                    "type": "boolean"
+                  },
+                  "rootfs": {
+                    "description": "Use volume as container root.",
+                    "format": {
+                      "acl": {
+                        "description": "Explicitly enable or disable ACL support.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "mountoptions": {
+                        "description": "Extra mount options for rootfs/mps.",
+                        "format_description": "opt[;opt...]",
+                        "optional": 1,
+                        "pattern": "(?^:(?^:(discard|lazytime|noatime|nodev|noexec|nosuid))(;(?^:(discard|lazytime|noatime|nodev|noexec|nosuid)))*)",
+                        "type": "string"
+                      },
+                      "quota": {
+                        "description": "Enable user quotas inside the container (not supported with zfs subvolumes)",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "replicate": {
+                        "default": 1,
+                        "description": "Will include this volume to a storage replica job.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "ro": {
+                        "description": "Read-only mount point",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "shared": {
+                        "default": 0,
+                        "description": "Mark this non-volume mount point as available on multiple nodes (see 'nodes')",
+                        "optional": 1,
+                        "type": "boolean",
+                        "verbose_description": "Mark this non-volume mount point as available on all nodes.\n\nWARNING: This option does not share the mount point automatically, it assumes it is shared already!"
+                      },
+                      "size": {
+                        "description": "Volume size (read only value).",
+                        "format": "disk-size",
+                        "format_description": "DiskSize",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "volume": {
+                        "default_key": 1,
+                        "description": "Volume, device or directory to mount into the container.",
+                        "format": "pve-lxc-mp-string",
+                        "format_description": "volume",
+                        "type": "string"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "searchdomain": {
+                    "description": "Sets DNS search domains for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.",
+                    "format": "dns-name-list",
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "startup": {
+                    "description": "Startup and shutdown behavior. Order is a non-negative number defining the general startup order. Shutdown in done with reverse ordering. Additionally you can set the 'up' or 'down' delay in seconds, which specifies a delay to wait before the next VM is started or stopped.",
+                    "format": "pve-startup-order",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "[[order=]\\d+] [,up=\\d+] [,down=\\d+] "
+                  },
+                  "swap": {
+                    "default": 512,
+                    "description": "Amount of SWAP for the container in MB.",
+                    "minimum": 0,
+                    "optional": 1,
+                    "type": "integer"
+                  },
+                  "tags": {
+                    "description": "Tags of the Container. This is only meta information.",
+                    "format": "pve-tag-list",
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "template": {
+                    "default": 0,
+                    "description": "Enable/disable Template.",
+                    "optional": 1,
+                    "type": "boolean"
+                  },
+                  "timezone": {
+                    "description": "Time zone to use in the container. If option isn't set, then nothing will be done. Can be set to 'host' to match the host time zone, or an arbitrary time zone option from /usr/share/zoneinfo/zone.tab",
+                    "format": "pve-ct-timezone",
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "tty": {
+                    "default": 2,
+                    "description": "Specify the number of tty available to the container",
+                    "maximum": 6,
+                    "minimum": 0,
+                    "optional": 1,
+                    "type": "integer"
+                  },
+                  "unprivileged": {
+                    "default": 0,
+                    "description": "Makes the container run as unprivileged user. (Should not be modified manually.)",
+                    "optional": 1,
+                    "type": "boolean"
+                  },
+                  "unused[n]": {
+                    "description": "Reference to unused volumes. This is used internally, and should not be modified manually.",
+                    "format": {
+                      "volume": {
+                        "default_key": 1,
+                        "description": "The volume that is not used currently.",
+                        "format": "pve-volume-id",
+                        "format_description": "volume",
+                        "type": "string"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "PUT": {
+              "allowtoken": 1,
+              "description": "Set container options.",
+              "method": "PUT",
+              "name": "update_vm",
+              "parameters": {
+                "additionalProperties": 0,
+                "properties": {
+                  "arch": {
+                    "default": "amd64",
+                    "description": "OS architecture type.",
+                    "enum": [
+                      "amd64",
+                      "i386",
+                      "arm64",
+                      "armhf",
+                      "riscv32",
+                      "riscv64"
+                    ],
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "cmode": {
+                    "default": "tty",
+                    "description": "Console mode. By default, the console command tries to open a connection to one of the available tty devices. By setting cmode to 'console' it tries to attach to /dev/console instead. If you set cmode to 'shell', it simply invokes a shell inside the container (no login).",
+                    "enum": [
+                      "shell",
+                      "console",
+                      "tty"
+                    ],
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "console": {
+                    "default": 1,
+                    "description": "Attach a console device (/dev/console) to the container.",
+                    "optional": 1,
+                    "type": "boolean",
+                    "typetext": "<boolean>"
+                  },
+                  "cores": {
+                    "description": "The number of cores assigned to the container. A container can use all available cores by default.",
+                    "maximum": 8192,
+                    "minimum": 1,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (1 - 8192)"
+                  },
+                  "cpulimit": {
+                    "default": 0,
+                    "description": "Limit of CPU usage.\n\nNOTE: If the computer has 2 CPUs, it has a total of '2' CPU time. Value '0' indicates no CPU limit.",
+                    "maximum": 8192,
+                    "minimum": 0,
+                    "optional": 1,
+                    "type": "number",
+                    "typetext": "<number> (0 - 8192)"
+                  },
+                  "cpuunits": {
+                    "default": "cgroup v1: 1024, cgroup v2: 100",
+                    "description": "CPU weight for a container, will be clamped to [1, 10000] in cgroup v2.",
+                    "maximum": 500000,
+                    "minimum": 0,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (0 - 500000)",
+                    "verbose_description": "CPU weight for a container. Argument is used in the kernel fair scheduler. The larger the number is, the more CPU time this container gets. Number is relative to the weights of all the other running guests."
+                  },
+                  "debug": {
+                    "default": 0,
+                    "description": "Try to be more verbose. For now this only enables debug log-level on start.",
+                    "optional": 1,
+                    "type": "boolean",
+                    "typetext": "<boolean>"
+                  },
+                  "delete": {
+                    "description": "A list of settings you want to delete.",
+                    "format": "pve-configid-list",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "description": {
+                    "description": "Description for the Container. Shown in the web-interface CT's summary. This is saved as comment inside the configuration file.",
+                    "maxLength": 8192,
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "dev[n]": {
+                    "description": "Device to pass through to the container",
+                    "format": {
+                      "deny-write": {
+                        "default": 0,
+                        "description": "Deny the container to write to the device",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "gid": {
+                        "description": "Group ID to be assigned to the device node",
+                        "minimum": 0,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "mode": {
+                        "description": "Access mode to be set on the device node",
+                        "format_description": "Octal access mode",
+                        "optional": 1,
+                        "pattern": "0[0-7]{3}",
+                        "type": "string"
+                      },
+                      "path": {
+                        "default_key": 1,
+                        "description": "Device to pass through to the container",
+                        "format": "pve-lxc-dev-string",
+                        "format_description": "Path",
+                        "optional": 1,
+                        "type": "string",
+                        "verbose_description": "Path to the device to pass through to the container"
+                      },
+                      "uid": {
+                        "description": "User ID to be assigned to the device node",
+                        "minimum": 0,
+                        "optional": 1,
+                        "type": "integer"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "[[path=]<Path>] [,deny-write=<1|0>] [,gid=<integer>] [,mode=<Octal access mode>] [,uid=<integer>]"
+                  },
+                  "digest": {
+                    "description": "Prevent changes if current configuration file has different SHA1 digest. This can be used to prevent concurrent modifications.",
+                    "maxLength": 40,
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "features": {
+                    "description": "Allow containers access to advanced features.",
+                    "format": {
+                      "force_rw_sys": {
+                        "default": 0,
+                        "description": "Mount /sys in unprivileged containers as `rw` instead of `mixed`. This can break networking under newer (>= v245) systemd-network use.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "fuse": {
+                        "default": 0,
+                        "description": "Allow using 'fuse' file systems in a container. Note that interactions between fuse and the freezer cgroup can potentially cause I/O deadlocks.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "keyctl": {
+                        "default": 0,
+                        "description": "For unprivileged containers only: Allow the use of the keyctl() system call. This is required to use docker inside a container. By default unprivileged containers will see this system call as non-existent. This is mostly a workaround for systemd-networkd, as it will treat it as a fatal error when some keyctl() operations are denied by the kernel due to lacking permissions. Essentially, you can choose between running systemd-networkd or docker.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "mknod": {
+                        "default": 0,
+                        "description": "Allow unprivileged containers to use mknod() to add certain device nodes. This requires a kernel with seccomp trap to user space support (5.3 or newer). This is experimental.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "mount": {
+                        "description": "Allow mounting file systems of specific types. This should be a list of file system types as used with the mount command. Note that this can have negative effects on the container's security. With access to a loop device, mounting a file can circumvent the mknod permission of the devices cgroup, mounting an NFS file system can block the host's I/O completely and prevent it from rebooting, etc.",
+                        "format_description": "fstype;fstype;...",
+                        "optional": 1,
+                        "pattern": "(?^:[a-zA-Z0-9_; ]+)",
+                        "type": "string"
+                      },
+                      "nesting": {
+                        "default": 0,
+                        "description": "Allow nesting. Best used with unprivileged containers with additional id mapping. Note that this will expose procfs and sysfs contents of the host to the guest.",
+                        "optional": 1,
+                        "type": "boolean"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "[force_rw_sys=<1|0>] [,fuse=<1|0>] [,keyctl=<1|0>] [,mknod=<1|0>] [,mount=<fstype;fstype;...>] [,nesting=<1|0>]"
+                  },
+                  "hookscript": {
+                    "description": "Script that will be executed during various steps in the containers lifetime.",
+                    "format": "pve-volume-id",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "hostname": {
+                    "description": "Set a host name for the container.",
+                    "format": "dns-name",
+                    "maxLength": 255,
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "lock": {
+                    "description": "Lock/unlock the container.",
+                    "enum": [
+                      "backup",
+                      "create",
+                      "destroyed",
+                      "disk",
+                      "fstrim",
+                      "migrate",
+                      "mounted",
+                      "rollback",
+                      "snapshot",
+                      "snapshot-delete"
+                    ],
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "memory": {
+                    "default": 512,
+                    "description": "Amount of RAM for the container in MB.",
+                    "minimum": 16,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (16 - N)"
+                  },
+                  "mp[n]": {
+                    "description": "Use volume as container mount point. Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.",
+                    "format": {
+                      "acl": {
+                        "description": "Explicitly enable or disable ACL support.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "backup": {
+                        "description": "Whether to include the mount point in backups.",
+                        "optional": 1,
+                        "type": "boolean",
+                        "verbose_description": "Whether to include the mount point in backups (only used for volume mount points)."
+                      },
+                      "mountoptions": {
+                        "description": "Extra mount options for rootfs/mps.",
+                        "format_description": "opt[;opt...]",
+                        "optional": 1,
+                        "pattern": "(?^:(?^:(discard|lazytime|noatime|nodev|noexec|nosuid))(;(?^:(discard|lazytime|noatime|nodev|noexec|nosuid)))*)",
+                        "type": "string"
+                      },
+                      "mp": {
+                        "description": "Path to the mount point as seen from inside the container (must not contain symlinks).",
+                        "format": "pve-lxc-mp-string",
+                        "format_description": "Path",
+                        "type": "string",
+                        "verbose_description": "Path to the mount point as seen from inside the container.\n\nNOTE: Must not contain any symlinks for security reasons."
+                      },
+                      "quota": {
+                        "description": "Enable user quotas inside the container (not supported with zfs subvolumes)",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "replicate": {
+                        "default": 1,
+                        "description": "Will include this volume to a storage replica job.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "ro": {
+                        "description": "Read-only mount point",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "shared": {
+                        "default": 0,
+                        "description": "Mark this non-volume mount point as available on multiple nodes (see 'nodes')",
+                        "optional": 1,
+                        "type": "boolean",
+                        "verbose_description": "Mark this non-volume mount point as available on all nodes.\n\nWARNING: This option does not share the mount point automatically, it assumes it is shared already!"
+                      },
+                      "size": {
+                        "description": "Volume size (read only value).",
+                        "format": "disk-size",
+                        "format_description": "DiskSize",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "volume": {
+                        "default_key": 1,
+                        "description": "Volume, device or directory to mount into the container.",
+                        "format": "pve-lxc-mp-string",
+                        "format_description": "volume",
+                        "type": "string"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
+                  },
+                  "nameserver": {
+                    "description": "Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.",
+                    "format": "lxc-ip-with-ll-iface-list",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "net[n]": {
+                    "description": "Specifies network interfaces for the container.",
+                    "format": {
+                      "bridge": {
+                        "description": "Bridge to attach the network device to.",
+                        "format_description": "bridge",
+                        "optional": 1,
+                        "pattern": "[-_.\\w\\d]+",
+                        "type": "string"
+                      },
+                      "firewall": {
+                        "description": "Controls whether this interface's firewall rules should be used.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "gw": {
+                        "description": "Default gateway for IPv4 traffic.",
+                        "format": "ipv4",
+                        "format_description": "GatewayIPv4",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "gw6": {
+                        "description": "Default gateway for IPv6 traffic.",
+                        "format": "ipv6",
+                        "format_description": "GatewayIPv6",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "hwaddr": {
+                        "description": "The interface MAC address. This is dynamically allocated by default, but you can set that statically if needed, for example to always have the same link-local IPv6 address. (lxc.network.hwaddr)",
+                        "format": "mac-addr",
+                        "format_description": "XX:XX:XX:XX:XX:XX",
+                        "optional": 1,
+                        "type": "string",
+                        "verbose_description": "A common MAC address with the I/G (Individual/Group) bit not set."
+                      },
+                      "ip": {
+                        "description": "IPv4 address in CIDR format.",
+                        "format": "pve-ipv4-config",
+                        "format_description": "(IPv4/CIDR|dhcp|manual)",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "ip6": {
+                        "description": "IPv6 address in CIDR format.",
+                        "format": "pve-ipv6-config",
+                        "format_description": "(IPv6/CIDR|auto|dhcp|manual)",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "link_down": {
+                        "description": "Whether this interface should be disconnected (like pulling the plug).",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "mtu": {
+                        "description": "Maximum transfer unit of the interface. (lxc.network.mtu)",
+                        "maximum": 65535,
+                        "minimum": 64,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "Name of the network device as seen from inside the container. (lxc.network.name)",
+                        "format_description": "string",
+                        "pattern": "[-_.\\w\\d]+",
+                        "type": "string"
+                      },
+                      "rate": {
+                        "description": "Apply rate limiting to the interface",
+                        "format_description": "mbps",
+                        "optional": 1,
+                        "type": "number"
+                      },
+                      "tag": {
+                        "description": "VLAN tag for this interface.",
+                        "maximum": 4094,
+                        "minimum": 1,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "trunks": {
+                        "description": "VLAN ids to pass through the interface",
+                        "format_description": "vlanid[;vlanid...]",
+                        "optional": 1,
+                        "pattern": "(?^:\\d+(?:;\\d+)*)",
+                        "type": "string"
+                      },
+                      "type": {
+                        "description": "Network interface type.",
+                        "enum": [
+                          "veth"
+                        ],
+                        "optional": 1,
+                        "type": "string"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "name=<string> [,bridge=<bridge>] [,firewall=<1|0>] [,gw=<GatewayIPv4>] [,gw6=<GatewayIPv6>] [,hwaddr=<XX:XX:XX:XX:XX:XX>] [,ip=<(IPv4/CIDR|dhcp|manual)>] [,ip6=<(IPv6/CIDR|auto|dhcp|manual)>] [,link_down=<1|0>] [,mtu=<integer>] [,rate=<mbps>] [,tag=<integer>] [,trunks=<vlanid[;vlanid...]>] [,type=<veth>]"
+                  },
+                  "node": {
+                    "description": "The cluster node name.",
+                    "format": "pve-node",
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "onboot": {
+                    "default": 0,
+                    "description": "Specifies whether a container will be started during system bootup.",
+                    "optional": 1,
+                    "type": "boolean",
+                    "typetext": "<boolean>"
+                  },
+                  "ostype": {
+                    "description": "OS type. This is used to setup configuration inside the container, and corresponds to lxc setup scripts in /usr/share/lxc/config/<ostype>.common.conf. Value 'unmanaged' can be used to skip and OS specific setup.",
+                    "enum": [
+                      "debian",
+                      "devuan",
+                      "ubuntu",
+                      "centos",
+                      "fedora",
+                      "opensuse",
+                      "archlinux",
+                      "alpine",
+                      "gentoo",
+                      "nixos",
+                      "unmanaged"
+                    ],
+                    "optional": 1,
+                    "type": "string"
+                  },
+                  "protection": {
+                    "default": 0,
+                    "description": "Sets the protection flag of the container. This will prevent the CT or CT's disk remove/update operation.",
+                    "optional": 1,
+                    "type": "boolean",
+                    "typetext": "<boolean>"
+                  },
+                  "revert": {
+                    "description": "Revert a pending change.",
+                    "format": "pve-configid-list",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "rootfs": {
+                    "description": "Use volume as container root.",
+                    "format": {
+                      "acl": {
+                        "description": "Explicitly enable or disable ACL support.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "mountoptions": {
+                        "description": "Extra mount options for rootfs/mps.",
+                        "format_description": "opt[;opt...]",
+                        "optional": 1,
+                        "pattern": "(?^:(?^:(discard|lazytime|noatime|nodev|noexec|nosuid))(;(?^:(discard|lazytime|noatime|nodev|noexec|nosuid)))*)",
+                        "type": "string"
+                      },
+                      "quota": {
+                        "description": "Enable user quotas inside the container (not supported with zfs subvolumes)",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "replicate": {
+                        "default": 1,
+                        "description": "Will include this volume to a storage replica job.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "ro": {
+                        "description": "Read-only mount point",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "shared": {
+                        "default": 0,
+                        "description": "Mark this non-volume mount point as available on multiple nodes (see 'nodes')",
+                        "optional": 1,
+                        "type": "boolean",
+                        "verbose_description": "Mark this non-volume mount point as available on all nodes.\n\nWARNING: This option does not share the mount point automatically, it assumes it is shared already!"
+                      },
+                      "size": {
+                        "description": "Volume size (read only value).",
+                        "format": "disk-size",
+                        "format_description": "DiskSize",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "volume": {
+                        "default_key": 1,
+                        "description": "Volume, device or directory to mount into the container.",
+                        "format": "pve-lxc-mp-string",
+                        "format_description": "volume",
+                        "type": "string"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "[volume=]<volume> [,acl=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
+                  },
+                  "searchdomain": {
+                    "description": "Sets DNS search domains for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.",
+                    "format": "dns-name-list",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "startup": {
+                    "description": "Startup and shutdown behavior. Order is a non-negative number defining the general startup order. Shutdown in done with reverse ordering. Additionally you can set the 'up' or 'down' delay in seconds, which specifies a delay to wait before the next VM is started or stopped.",
+                    "format": "pve-startup-order",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "[[order=]\\d+] [,up=\\d+] [,down=\\d+] "
+                  },
+                  "swap": {
+                    "default": 512,
+                    "description": "Amount of SWAP for the container in MB.",
+                    "minimum": 0,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (0 - N)"
+                  },
+                  "tags": {
+                    "description": "Tags of the Container. This is only meta information.",
+                    "format": "pve-tag-list",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "template": {
+                    "default": 0,
+                    "description": "Enable/disable Template.",
+                    "optional": 1,
+                    "type": "boolean",
+                    "typetext": "<boolean>"
+                  },
+                  "timezone": {
+                    "description": "Time zone to use in the container. If option isn't set, then nothing will be done. Can be set to 'host' to match the host time zone, or an arbitrary time zone option from /usr/share/zoneinfo/zone.tab",
+                    "format": "pve-ct-timezone",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "tty": {
+                    "default": 2,
+                    "description": "Specify the number of tty available to the container",
+                    "maximum": 6,
+                    "minimum": 0,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (0 - 6)"
+                  },
+                  "unprivileged": {
+                    "default": 0,
+                    "description": "Makes the container run as unprivileged user. (Should not be modified manually.)",
+                    "optional": 1,
+                    "type": "boolean",
+                    "typetext": "<boolean>"
+                  },
+                  "unused[n]": {
+                    "description": "Reference to unused volumes. This is used internally, and should not be modified manually.",
+                    "format": {
+                      "volume": {
+                        "default_key": 1,
+                        "description": "The volume that is not used currently.",
+                        "format": "pve-volume-id",
+                        "format_description": "volume",
+                        "type": "string"
+                      }
+                    },
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "[volume=]<volume>"
+                  },
+                  "vmid": {
+                    "description": "The (unique) ID of the VM.",
+                    "format": "pve-vmid",
+                    "maximum": 999999999,
+                    "minimum": 100,
+                    "type": "integer",
+                    "typetext": "<integer> (100 - 999999999)"
+                  }
+                }
+              },
+              "permissions": {
+                "check": [
+                  "perm",
+                  "/vms/{vmid}",
+                  [
+                    "VM.Config.Disk",
+                    "VM.Config.CPU",
+                    "VM.Config.Memory",
+                    "VM.Config.Network",
+                    "VM.Config.Options"
+                  ],
+                  "any",
+                  1
+                ],
+                "description": "non-volume mount points in rootfs and mp[n] are restricted to root@pam"
+              },
+              "protected": 1,
+              "proxyto": "node",
+              "returns": {
+                "type": "null"
+              }
+            }
+          },
+          "leaf": 1,
+          "path": "/nodes/{node}/lxc/{vmid}/config",
+          "text": "config"
+        },
+        {
+          "children": [
+            {
+              "info": {
+                "GET": {
+                  "allowtoken": 1,
+                  "description": "Get virtual machine status.",
+                  "method": "GET",
+                  "name": "vm_status",
+                  "parameters": {
+                    "additionalProperties": 0,
+                    "properties": {
+                      "node": {
+                        "description": "The cluster node name.",
+                        "format": "pve-node",
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "vmid": {
+                        "description": "The (unique) ID of the VM.",
+                        "format": "pve-vmid",
+                        "maximum": 999999999,
+                        "minimum": 100,
+                        "type": "integer",
+                        "typetext": "<integer> (100 - 999999999)"
+                      }
+                    }
+                  },
+                  "permissions": {
+                    "check": [
+                      "perm",
+                      "/vms/{vmid}",
+                      [
+                        "VM.Audit"
+                      ]
+                    ]
+                  },
+                  "protected": 1,
+                  "proxyto": "node",
+                  "returns": {
+                    "properties": {
+                      "cpu": {
+                        "description": "Current CPU usage.",
+                        "optional": 1,
+                        "type": "number"
+                      },
+                      "cpus": {
+                        "description": "Maximum usable CPUs.",
+                        "optional": 1,
+                        "type": "number"
+                      },
+                      "disk": {
+                        "description": "Root disk image space-usage in bytes.",
+                        "minimum": 0,
+                        "optional": 1,
+                        "renderer": "bytes",
+                        "type": "integer"
+                      },
+                      "diskread": {
+                        "description": "The amount of bytes the guest read from it's block devices since the guest was started. (Note: This info is not available for all storage types.)",
+                        "optional": 1,
+                        "renderer": "bytes",
+                        "type": "integer"
+                      },
+                      "diskwrite": {
+                        "description": "The amount of bytes the guest wrote from it's block devices since the guest was started. (Note: This info is not available for all storage types.)",
+                        "optional": 1,
+                        "renderer": "bytes",
+                        "type": "integer"
+                      },
+                      "ha": {
+                        "description": "HA manager service status.",
+                        "type": "object"
+                      },
+                      "lock": {
+                        "description": "The current config lock, if any.",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "maxdisk": {
+                        "description": "Root disk image size in bytes.",
+                        "optional": 1,
+                        "renderer": "bytes",
+                        "type": "integer"
+                      },
+                      "maxmem": {
+                        "description": "Maximum memory in bytes.",
+                        "optional": 1,
+                        "renderer": "bytes",
+                        "type": "integer"
+                      },
+                      "maxswap": {
+                        "description": "Maximum SWAP memory in bytes.",
+                        "optional": 1,
+                        "renderer": "bytes",
+                        "type": "integer"
+                      },
+                      "mem": {
+                        "description": "Currently used memory in bytes.",
+                        "optional": 1,
+                        "renderer": "bytes",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "Container name.",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "netin": {
+                        "description": "The amount of traffic in bytes that was sent to the guest over the network since it was started.",
+                        "optional": 1,
+                        "renderer": "bytes",
+                        "type": "integer"
+                      },
+                      "netout": {
+                        "description": "The amount of traffic in bytes that was sent from the guest over the network since it was started.",
+                        "optional": 1,
+                        "renderer": "bytes",
+                        "type": "integer"
+                      },
+                      "status": {
+                        "description": "LXC Container status.",
+                        "enum": [
+                          "stopped",
+                          "running"
+                        ],
+                        "type": "string"
+                      },
+                      "tags": {
+                        "description": "The current configured tags, if any.",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "template": {
+                        "default": 0,
+                        "description": "Determines if the guest is a template.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "uptime": {
+                        "description": "Uptime in seconds.",
+                        "optional": 1,
+                        "renderer": "duration",
+                        "type": "integer"
+                      },
+                      "vmid": {
+                        "description": "The (unique) ID of the VM.",
+                        "format": "pve-vmid",
+                        "maximum": 999999999,
+                        "minimum": 100,
+                        "type": "integer"
+                      }
+                    },
+                    "type": "object"
+                  }
+                }
+              },
+              "leaf": 1,
+              "path": "/nodes/{node}/lxc/{vmid}/status/current",
+              "text": "current"
+            },
+            {
+              "info": {
+                "POST": {
+                  "allowtoken": 1,
+                  "description": "Start the container.",
+                  "method": "POST",
+                  "name": "vm_start",
+                  "parameters": {
+                    "additionalProperties": 0,
+                    "properties": {
+                      "debug": {
+                        "default": 0,
+                        "description": "If set, enables very verbose debug log-level on start.",
+                        "optional": 1,
+                        "type": "boolean",
+                        "typetext": "<boolean>"
+                      },
+                      "node": {
+                        "description": "The cluster node name.",
+                        "format": "pve-node",
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "skiplock": {
+                        "description": "Ignore locks - only root is allowed to use this option.",
+                        "optional": 1,
+                        "type": "boolean",
+                        "typetext": "<boolean>"
+                      },
+                      "vmid": {
+                        "description": "The (unique) ID of the VM.",
+                        "format": "pve-vmid",
+                        "maximum": 999999999,
+                        "minimum": 100,
+                        "type": "integer",
+                        "typetext": "<integer> (100 - 999999999)"
+                      }
+                    }
+                  },
+                  "permissions": {
+                    "check": [
+                      "perm",
+                      "/vms/{vmid}",
+                      [
+                        "VM.PowerMgmt"
+                      ]
+                    ]
+                  },
+                  "protected": 1,
+                  "proxyto": "node",
+                  "returns": {
+                    "type": "string"
+                  }
+                }
+              },
+              "leaf": 1,
+              "path": "/nodes/{node}/lxc/{vmid}/status/start",
+              "text": "start"
+            },
+            {
+              "info": {
+                "POST": {
+                  "allowtoken": 1,
+                  "description": "Stop the container. This will abruptly stop all processes running in the container.",
+                  "method": "POST",
+                  "name": "vm_stop",
+                  "parameters": {
+                    "additionalProperties": 0,
+                    "properties": {
+                      "node": {
+                        "description": "The cluster node name.",
+                        "format": "pve-node",
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "overrule-shutdown": {
+                        "default": 0,
+                        "description": "Try to abort active 'vzshutdown' tasks before stopping.",
+                        "optional": 1,
+                        "type": "boolean",
+                        "typetext": "<boolean>"
+                      },
+                      "skiplock": {
+                        "description": "Ignore locks - only root is allowed to use this option.",
+                        "optional": 1,
+                        "type": "boolean",
+                        "typetext": "<boolean>"
+                      },
+                      "vmid": {
+                        "description": "The (unique) ID of the VM.",
+                        "format": "pve-vmid",
+                        "maximum": 999999999,
+                        "minimum": 100,
+                        "type": "integer",
+                        "typetext": "<integer> (100 - 999999999)"
+                      }
+                    }
+                  },
+                  "permissions": {
+                    "check": [
+                      "perm",
+                      "/vms/{vmid}",
+                      [
+                        "VM.PowerMgmt"
+                      ]
+                    ]
+                  },
+                  "protected": 1,
+                  "proxyto": "node",
+                  "returns": {
+                    "type": "string"
+                  }
+                }
+              },
+              "leaf": 1,
+              "path": "/nodes/{node}/lxc/{vmid}/status/stop",
+              "text": "stop"
+            },
+            {
+              "info": {
+                "POST": {
+                  "allowtoken": 1,
+                  "description": "Shutdown the container. This will trigger a clean shutdown of the container, see lxc-stop(1) for details.",
+                  "method": "POST",
+                  "name": "vm_shutdown",
+                  "parameters": {
+                    "additionalProperties": 0,
+                    "properties": {
+                      "forceStop": {
+                        "default": 0,
+                        "description": "Make sure the Container stops.",
+                        "optional": 1,
+                        "type": "boolean",
+                        "typetext": "<boolean>"
+                      },
+                      "node": {
+                        "description": "The cluster node name.",
+                        "format": "pve-node",
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "timeout": {
+                        "default": 60,
+                        "description": "Wait maximal timeout seconds.",
+                        "minimum": 0,
+                        "optional": 1,
+                        "type": "integer",
+                        "typetext": "<integer> (0 - N)"
+                      },
+                      "vmid": {
+                        "description": "The (unique) ID of the VM.",
+                        "format": "pve-vmid",
+                        "maximum": 999999999,
+                        "minimum": 100,
+                        "type": "integer",
+                        "typetext": "<integer> (100 - 999999999)"
+                      }
+                    }
+                  },
+                  "permissions": {
+                    "check": [
+                      "perm",
+                      "/vms/{vmid}",
+                      [
+                        "VM.PowerMgmt"
+                      ]
+                    ]
+                  },
+                  "protected": 1,
+                  "proxyto": "node",
+                  "returns": {
+                    "type": "string"
+                  }
+                }
+              },
+              "leaf": 1,
+              "path": "/nodes/{node}/lxc/{vmid}/status/shutdown",
+              "text": "shutdown"
+            },
+            {
+              "info": {
+                "POST": {
+                  "allowtoken": 1,
+                  "description": "Suspend the container. This is experimental.",
+                  "method": "POST",
+                  "name": "vm_suspend",
+                  "parameters": {
+                    "additionalProperties": 0,
+                    "properties": {
+                      "node": {
+                        "description": "The cluster node name.",
+                        "format": "pve-node",
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "vmid": {
+                        "description": "The (unique) ID of the VM.",
+                        "format": "pve-vmid",
+                        "maximum": 999999999,
+                        "minimum": 100,
+                        "type": "integer",
+                        "typetext": "<integer> (100 - 999999999)"
+                      }
+                    }
+                  },
+                  "permissions": {
+                    "check": [
+                      "perm",
+                      "/vms/{vmid}",
+                      [
+                        "VM.PowerMgmt"
+                      ]
+                    ]
+                  },
+                  "protected": 1,
+                  "proxyto": "node",
+                  "returns": {
+                    "type": "string"
+                  }
+                }
+              },
+              "leaf": 1,
+              "path": "/nodes/{node}/lxc/{vmid}/status/suspend",
+              "text": "suspend"
+            },
+            {
+              "info": {
+                "POST": {
+                  "allowtoken": 1,
+                  "description": "Resume the container.",
+                  "method": "POST",
+                  "name": "vm_resume",
+                  "parameters": {
+                    "additionalProperties": 0,
+                    "properties": {
+                      "node": {
+                        "description": "The cluster node name.",
+                        "format": "pve-node",
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "vmid": {
+                        "description": "The (unique) ID of the VM.",
+                        "format": "pve-vmid",
+                        "maximum": 999999999,
+                        "minimum": 100,
+                        "type": "integer",
+                        "typetext": "<integer> (100 - 999999999)"
+                      }
+                    }
+                  },
+                  "permissions": {
+                    "check": [
+                      "perm",
+                      "/vms/{vmid}",
+                      [
+                        "VM.PowerMgmt"
+                      ]
+                    ]
+                  },
+                  "protected": 1,
+                  "proxyto": "node",
+                  "returns": {
+                    "type": "string"
+                  }
+                }
+              },
+              "leaf": 1,
+              "path": "/nodes/{node}/lxc/{vmid}/status/resume",
+              "text": "resume"
+            },
+            {
+              "info": {
+                "POST": {
+                  "allowtoken": 1,
+                  "description": "Reboot the container by shutting it down, and starting it again. Applies pending changes.",
+                  "method": "POST",
+                  "name": "vm_reboot",
+                  "parameters": {
+                    "additionalProperties": 0,
+                    "properties": {
+                      "node": {
+                        "description": "The cluster node name.",
+                        "format": "pve-node",
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "timeout": {
+                        "description": "Wait maximal timeout seconds for the shutdown.",
+                        "minimum": 0,
+                        "optional": 1,
+                        "type": "integer",
+                        "typetext": "<integer> (0 - N)"
+                      },
+                      "vmid": {
+                        "description": "The (unique) ID of the VM.",
+                        "format": "pve-vmid",
+                        "maximum": 999999999,
+                        "minimum": 100,
+                        "type": "integer",
+                        "typetext": "<integer> (100 - 999999999)"
+                      }
+                    }
+                  },
+                  "permissions": {
+                    "check": [
+                      "perm",
+                      "/vms/{vmid}",
+                      [
+                        "VM.PowerMgmt"
+                      ]
+                    ]
+                  },
+                  "protected": 1,
+                  "proxyto": "node",
+                  "returns": {
+                    "type": "string"
+                  }
+                }
+              },
+              "leaf": 1,
+              "path": "/nodes/{node}/lxc/{vmid}/status/reboot",
+              "text": "reboot"
+            }
+          ],
+          "info": {
+            "GET": {
+              "allowtoken": 1,
+              "description": "Directory index",
+              "method": "GET",
+              "name": "vmcmdidx",
+              "parameters": {
+                "additionalProperties": 0,
+                "properties": {
+                  "node": {
+                    "description": "The cluster node name.",
+                    "format": "pve-node",
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "vmid": {
+                    "description": "The (unique) ID of the VM.",
+                    "format": "pve-vmid",
+                    "maximum": 999999999,
+                    "minimum": 100,
+                    "type": "integer",
+                    "typetext": "<integer> (100 - 999999999)"
+                  }
+                }
+              },
+              "permissions": {
+                "user": "all"
+              },
+              "proxyto": "node",
+              "returns": {
+                "items": {
+                  "properties": {
+                    "subdir": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "links": [
+                  {
+                    "href": "{subdir}",
+                    "rel": "child"
+                  }
+                ],
+                "type": "array"
+              }
+            }
+          },
+          "leaf": 0,
+          "path": "/nodes/{node}/lxc/{vmid}/status",
+          "text": "status"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "info": {
+                    "POST": {
+                      "allowtoken": 1,
+                      "description": "Rollback LXC state to specified snapshot.",
+                      "method": "POST",
+                      "name": "rollback",
+                      "parameters": {
+                        "additionalProperties": 0,
+                        "properties": {
+                          "node": {
+                            "description": "The cluster node name.",
+                            "format": "pve-node",
+                            "type": "string",
+                            "typetext": "<string>"
+                          },
+                          "snapname": {
+                            "description": "The name of the snapshot.",
+                            "format": "pve-configid",
+                            "maxLength": 40,
+                            "type": "string",
+                            "typetext": "<string>"
+                          },
+                          "start": {
+                            "default": 0,
+                            "description": "Whether the container should get started after rolling back successfully",
+                            "optional": 1,
+                            "type": "boolean",
+                            "typetext": "<boolean>"
+                          },
+                          "vmid": {
+                            "description": "The (unique) ID of the VM.",
+                            "format": "pve-vmid",
+                            "maximum": 999999999,
+                            "minimum": 100,
+                            "type": "integer",
+                            "typetext": "<integer> (100 - 999999999)"
+                          }
+                        }
+                      },
+                      "permissions": {
+                        "check": [
+                          "perm",
+                          "/vms/{vmid}",
+                          [
+                            "VM.Snapshot",
+                            "VM.Snapshot.Rollback"
+                          ],
+                          "any",
+                          1
+                        ]
+                      },
+                      "protected": 1,
+                      "proxyto": "node",
+                      "returns": {
+                        "description": "the task ID.",
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "leaf": 1,
+                  "path": "/nodes/{node}/lxc/{vmid}/snapshot/{snapname}/rollback",
+                  "text": "rollback"
+                },
+                {
+                  "info": {
+                    "GET": {
+                      "allowtoken": 1,
+                      "description": "Get snapshot configuration",
+                      "method": "GET",
+                      "name": "get_snapshot_config",
+                      "parameters": {
+                        "additionalProperties": 0,
+                        "properties": {
+                          "node": {
+                            "description": "The cluster node name.",
+                            "format": "pve-node",
+                            "type": "string",
+                            "typetext": "<string>"
+                          },
+                          "snapname": {
+                            "description": "The name of the snapshot.",
+                            "format": "pve-configid",
+                            "maxLength": 40,
+                            "type": "string",
+                            "typetext": "<string>"
+                          },
+                          "vmid": {
+                            "description": "The (unique) ID of the VM.",
+                            "format": "pve-vmid",
+                            "maximum": 999999999,
+                            "minimum": 100,
+                            "type": "integer",
+                            "typetext": "<integer> (100 - 999999999)"
+                          }
+                        }
+                      },
+                      "permissions": {
+                        "check": [
+                          "perm",
+                          "/vms/{vmid}",
+                          [
+                            "VM.Snapshot",
+                            "VM.Snapshot.Rollback",
+                            "VM.Audit"
+                          ],
+                          "any",
+                          1
+                        ]
+                      },
+                      "proxyto": "node",
+                      "returns": {
+                        "type": "object"
+                      }
+                    },
+                    "PUT": {
+                      "allowtoken": 1,
+                      "description": "Update snapshot metadata.",
+                      "method": "PUT",
+                      "name": "update_snapshot_config",
+                      "parameters": {
+                        "additionalProperties": 0,
+                        "properties": {
+                          "description": {
+                            "description": "A textual description or comment.",
+                            "optional": 1,
+                            "type": "string",
+                            "typetext": "<string>"
+                          },
+                          "node": {
+                            "description": "The cluster node name.",
+                            "format": "pve-node",
+                            "type": "string",
+                            "typetext": "<string>"
+                          },
+                          "snapname": {
+                            "description": "The name of the snapshot.",
+                            "format": "pve-configid",
+                            "maxLength": 40,
+                            "type": "string",
+                            "typetext": "<string>"
+                          },
+                          "vmid": {
+                            "description": "The (unique) ID of the VM.",
+                            "format": "pve-vmid",
+                            "maximum": 999999999,
+                            "minimum": 100,
+                            "type": "integer",
+                            "typetext": "<integer> (100 - 999999999)"
+                          }
+                        }
+                      },
+                      "permissions": {
+                        "check": [
+                          "perm",
+                          "/vms/{vmid}",
+                          [
+                            "VM.Snapshot"
+                          ]
+                        ]
+                      },
+                      "protected": 1,
+                      "proxyto": "node",
+                      "returns": {
+                        "type": "null"
+                      }
+                    }
+                  },
+                  "leaf": 1,
+                  "path": "/nodes/{node}/lxc/{vmid}/snapshot/{snapname}/config",
+                  "text": "config"
+                }
+              ],
+              "info": {
+                "DELETE": {
+                  "allowtoken": 1,
+                  "description": "Delete a LXC snapshot.",
+                  "method": "DELETE",
+                  "name": "delsnapshot",
+                  "parameters": {
+                    "additionalProperties": 0,
+                    "properties": {
+                      "force": {
+                        "description": "For removal from config file, even if removing disk snapshots fails.",
+                        "optional": 1,
+                        "type": "boolean",
+                        "typetext": "<boolean>"
+                      },
+                      "node": {
+                        "description": "The cluster node name.",
+                        "format": "pve-node",
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "snapname": {
+                        "description": "The name of the snapshot.",
+                        "format": "pve-configid",
+                        "maxLength": 40,
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "vmid": {
+                        "description": "The (unique) ID of the VM.",
+                        "format": "pve-vmid",
+                        "maximum": 999999999,
+                        "minimum": 100,
+                        "type": "integer",
+                        "typetext": "<integer> (100 - 999999999)"
+                      }
+                    }
+                  },
+                  "permissions": {
+                    "check": [
+                      "perm",
+                      "/vms/{vmid}",
+                      [
+                        "VM.Snapshot"
+                      ]
+                    ]
+                  },
+                  "protected": 1,
+                  "proxyto": "node",
+                  "returns": {
+                    "description": "the task ID.",
+                    "type": "string"
+                  }
+                },
+                "GET": {
+                  "allowtoken": 1,
+                  "description": "",
+                  "method": "GET",
+                  "name": "snapshot_cmd_idx",
+                  "parameters": {
+                    "additionalProperties": 0,
+                    "properties": {
+                      "node": {
+                        "description": "The cluster node name.",
+                        "format": "pve-node",
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "snapname": {
+                        "description": "The name of the snapshot.",
+                        "format": "pve-configid",
+                        "maxLength": 40,
+                        "type": "string",
+                        "typetext": "<string>"
+                      },
+                      "vmid": {
+                        "description": "The (unique) ID of the VM.",
+                        "format": "pve-vmid",
+                        "maximum": 999999999,
+                        "minimum": 100,
+                        "type": "integer",
+                        "typetext": "<integer> (100 - 999999999)"
+                      }
+                    }
+                  },
+                  "permissions": {
+                    "user": "all"
+                  },
+                  "returns": {
+                    "items": {
+                      "properties": {},
+                      "type": "object"
+                    },
+                    "links": [
+                      {
+                        "href": "{cmd}",
+                        "rel": "child"
+                      }
+                    ],
+                    "type": "array"
+                  }
+                }
+              },
+              "leaf": 0,
+              "path": "/nodes/{node}/lxc/{vmid}/snapshot/{snapname}",
+              "text": "{snapname}"
+            }
+          ],
+          "info": {
+            "GET": {
+              "allowtoken": 1,
+              "description": "List all snapshots.",
+              "method": "GET",
+              "name": "list",
+              "parameters": {
+                "additionalProperties": 0,
+                "properties": {
+                  "node": {
+                    "description": "The cluster node name.",
+                    "format": "pve-node",
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "vmid": {
+                    "description": "The (unique) ID of the VM.",
+                    "format": "pve-vmid",
+                    "maximum": 999999999,
+                    "minimum": 100,
+                    "type": "integer",
+                    "typetext": "<integer> (100 - 999999999)"
+                  }
+                }
+              },
+              "permissions": {
+                "check": [
+                  "perm",
+                  "/vms/{vmid}",
+                  [
+                    "VM.Audit"
+                  ]
+                ]
+              },
+              "protected": 1,
+              "proxyto": "node",
+              "returns": {
+                "items": {
+                  "properties": {
+                    "description": {
+                      "description": "Snapshot description.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "Snapshot identifier. Value 'current' identifies the current VM.",
+                      "type": "string"
+                    },
+                    "parent": {
+                      "description": "Parent snapshot identifier.",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "snaptime": {
+                      "description": "Snapshot creation time",
+                      "optional": 1,
+                      "renderer": "timestamp",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                },
+                "links": [
+                  {
+                    "href": "{name}",
+                    "rel": "child"
+                  }
+                ],
+                "type": "array"
+              }
+            },
+            "POST": {
+              "allowtoken": 1,
+              "description": "Snapshot a container.",
+              "method": "POST",
+              "name": "snapshot",
+              "parameters": {
+                "additionalProperties": 0,
+                "properties": {
+                  "description": {
+                    "description": "A textual description or comment.",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "node": {
+                    "description": "The cluster node name.",
+                    "format": "pve-node",
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "snapname": {
+                    "description": "The name of the snapshot.",
+                    "format": "pve-configid",
+                    "maxLength": 40,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "vmid": {
+                    "description": "The (unique) ID of the VM.",
+                    "format": "pve-vmid",
+                    "maximum": 999999999,
+                    "minimum": 100,
+                    "type": "integer",
+                    "typetext": "<integer> (100 - 999999999)"
+                  }
+                }
+              },
+              "permissions": {
+                "check": [
+                  "perm",
+                  "/vms/{vmid}",
+                  [
+                    "VM.Snapshot"
+                  ]
+                ]
+              },
+              "protected": 1,
+              "proxyto": "node",
+              "returns": {
+                "description": "the task ID.",
+                "type": "string"
+              }
+            }
+          },
+          "leaf": 0,
+          "path": "/nodes/{node}/lxc/{vmid}/snapshot",
+          "text": "snapshot"
+        },
+        {
+          "info": {
+            "POST": {
+              "allowtoken": 1,
+              "description": "Returns a SPICE configuration to connect to the CT.",
+              "method": "POST",
+              "name": "spiceproxy",
+              "parameters": {
+                "additionalProperties": 0,
+                "properties": {
+                  "node": {
+                    "description": "The cluster node name.",
+                    "format": "pve-node",
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "proxy": {
+                    "description": "SPICE proxy server. This can be used by the client to specify the proxy server. All nodes in a cluster runs 'spiceproxy', so it is up to the client to choose one. By default, we return the node where the VM is currently running. As reasonable setting is to use same node you use to connect to the API (This is window.location.hostname for the JS GUI).",
+                    "format": "address",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "vmid": {
+                    "description": "The (unique) ID of the VM.",
+                    "format": "pve-vmid",
+                    "maximum": 999999999,
+                    "minimum": 100,
+                    "type": "integer",
+                    "typetext": "<integer> (100 - 999999999)"
+                  }
+                }
+              },
+              "permissions": {
+                "check": [
+                  "perm",
+                  "/vms/{vmid}",
+                  [
+                    "VM.Console"
+                  ]
+                ]
+              },
+              "protected": 1,
+              "proxyto": "node",
+              "returns": {
+                "additionalProperties": 1,
+                "description": "Returned values can be directly passed to the 'remote-viewer' application.",
+                "properties": {
+                  "host": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "proxy": {
+                    "type": "string"
+                  },
+                  "tls-port": {
+                    "type": "integer"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "leaf": 1,
+          "path": "/nodes/{node}/lxc/{vmid}/spiceproxy",
+          "text": "spiceproxy"
+        },
+        {
+          "info": {
+            "POST": {
+              "allowtoken": 1,
+              "description": "Create a container clone/copy",
+              "method": "POST",
+              "name": "clone_vm",
+              "parameters": {
+                "additionalProperties": 0,
+                "properties": {
+                  "bwlimit": {
+                    "default": "clone limit from datacenter or storage config",
+                    "description": "Override I/O bandwidth limit (in KiB/s).",
+                    "minimum": "0",
+                    "optional": 1,
+                    "type": "number",
+                    "typetext": "<number> (0 - N)"
+                  },
+                  "description": {
+                    "description": "Description for the new CT.",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "full": {
+                    "description": "Create a full copy of all disks. This is always done when you clone a normal CT. For CT templates, we try to create a linked clone by default.",
+                    "optional": 1,
+                    "type": "boolean",
+                    "typetext": "<boolean>"
+                  },
+                  "hostname": {
+                    "description": "Set a hostname for the new CT.",
+                    "format": "dns-name",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "newid": {
+                    "description": "VMID for the clone.",
+                    "format": "pve-vmid",
+                    "maximum": 999999999,
+                    "minimum": 100,
+                    "type": "integer",
+                    "typetext": "<integer> (100 - 999999999)"
+                  },
+                  "node": {
+                    "description": "The cluster node name.",
+                    "format": "pve-node",
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "pool": {
+                    "description": "Add the new CT to the specified pool.",
+                    "format": "pve-poolid",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "snapname": {
+                    "description": "The name of the snapshot.",
+                    "format": "pve-configid",
+                    "maxLength": 40,
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "storage": {
+                    "description": "Target storage for full clone.",
+                    "format": "pve-storage-id",
+                    "format_description": "storage ID",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<storage ID>"
+                  },
+                  "target": {
+                    "description": "Target node. Only allowed if the original VM is on shared storage.",
+                    "format": "pve-node",
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "vmid": {
+                    "description": "The (unique) ID of the VM.",
+                    "format": "pve-vmid",
+                    "maximum": 999999999,
+                    "minimum": 100,
+                    "type": "integer",
+                    "typetext": "<integer> (100 - 999999999)"
+                  }
+                }
+              },
+              "permissions": {
+                "check": [
+                  "and",
+                  [
+                    "perm",
+                    "/vms/{vmid}",
+                    [
+                      "VM.Clone"
+                    ]
+                  ],
+                  [
+                    "or",
+                    [
+                      "perm",
+                      "/vms/{newid}",
+                      [
+                        "VM.Allocate"
+                      ]
+                    ],
+                    [
+                      "perm",
+                      "/pool/{pool}",
+                      [
+                        "VM.Allocate"
+                      ],
+                      "require_param",
+                      "pool"
+                    ]
+                  ]
+                ],
+                "description": "You need 'VM.Clone' permissions on /vms/{vmid}, and 'VM.Allocate' permissions on /vms/{newid} (or on the VM pool /pool/{pool}). You also need 'Datastore.AllocateSpace' on any used storage, and 'SDN.Use' on any bridge."
+              },
+              "protected": 1,
+              "proxyto": "node",
+              "returns": {
+                "type": "string"
+              }
+            }
+          },
+          "leaf": 1,
+          "path": "/nodes/{node}/lxc/{vmid}/clone",
+          "text": "clone"
+        },
+        {
+          "info": {
+            "PUT": {
+              "allowtoken": 1,
+              "description": "Resize a container mount point.",
+              "method": "PUT",
+              "name": "resize_vm",
+              "parameters": {
+                "additionalProperties": 0,
+                "properties": {
+                  "digest": {
+                    "description": "Prevent changes if current configuration file has different SHA1 digest. This can be used to prevent concurrent modifications.",
+                    "maxLength": 40,
+                    "optional": 1,
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "disk": {
+                    "description": "The disk you want to resize.",
+                    "enum": [
+                      "rootfs",
+                      "mp0",
+                      "mp1",
+                      "mp2",
+                      "mp3",
+                      "mp4",
+                      "mp5",
+                      "mp6",
+                      "mp7",
+                      "mp8",
+                      "mp9",
+                      "mp10",
+                      "mp11",
+                      "mp12",
+                      "mp13",
+                      "mp14",
+                      "mp15",
+                      "mp16",
+                      "mp17",
+                      "mp18",
+                      "mp19",
+                      "mp20",
+                      "mp21",
+                      "mp22",
+                      "mp23",
+                      "mp24",
+                      "mp25",
+                      "mp26",
+                      "mp27",
+                      "mp28",
+                      "mp29",
+                      "mp30",
+                      "mp31",
+                      "mp32",
+                      "mp33",
+                      "mp34",
+                      "mp35",
+                      "mp36",
+                      "mp37",
+                      "mp38",
+                      "mp39",
+                      "mp40",
+                      "mp41",
+                      "mp42",
+                      "mp43",
+                      "mp44",
+                      "mp45",
+                      "mp46",
+                      "mp47",
+                      "mp48",
+                      "mp49",
+                      "mp50",
+                      "mp51",
+                      "mp52",
+                      "mp53",
+                      "mp54",
+                      "mp55",
+                      "mp56",
+                      "mp57",
+                      "mp58",
+                      "mp59",
+                      "mp60",
+                      "mp61",
+                      "mp62",
+                      "mp63",
+                      "mp64",
+                      "mp65",
+                      "mp66",
+                      "mp67",
+                      "mp68",
+                      "mp69",
+                      "mp70",
+                      "mp71",
+                      "mp72",
+                      "mp73",
+                      "mp74",
+                      "mp75",
+                      "mp76",
+                      "mp77",
+                      "mp78",
+                      "mp79",
+                      "mp80",
+                      "mp81",
+                      "mp82",
+                      "mp83",
+                      "mp84",
+                      "mp85",
+                      "mp86",
+                      "mp87",
+                      "mp88",
+                      "mp89",
+                      "mp90",
+                      "mp91",
+                      "mp92",
+                      "mp93",
+                      "mp94",
+                      "mp95",
+                      "mp96",
+                      "mp97",
+                      "mp98",
+                      "mp99",
+                      "mp100",
+                      "mp101",
+                      "mp102",
+                      "mp103",
+                      "mp104",
+                      "mp105",
+                      "mp106",
+                      "mp107",
+                      "mp108",
+                      "mp109",
+                      "mp110",
+                      "mp111",
+                      "mp112",
+                      "mp113",
+                      "mp114",
+                      "mp115",
+                      "mp116",
+                      "mp117",
+                      "mp118",
+                      "mp119",
+                      "mp120",
+                      "mp121",
+                      "mp122",
+                      "mp123",
+                      "mp124",
+                      "mp125",
+                      "mp126",
+                      "mp127",
+                      "mp128",
+                      "mp129",
+                      "mp130",
+                      "mp131",
+                      "mp132",
+                      "mp133",
+                      "mp134",
+                      "mp135",
+                      "mp136",
+                      "mp137",
+                      "mp138",
+                      "mp139",
+                      "mp140",
+                      "mp141",
+                      "mp142",
+                      "mp143",
+                      "mp144",
+                      "mp145",
+                      "mp146",
+                      "mp147",
+                      "mp148",
+                      "mp149",
+                      "mp150",
+                      "mp151",
+                      "mp152",
+                      "mp153",
+                      "mp154",
+                      "mp155",
+                      "mp156",
+                      "mp157",
+                      "mp158",
+                      "mp159",
+                      "mp160",
+                      "mp161",
+                      "mp162",
+                      "mp163",
+                      "mp164",
+                      "mp165",
+                      "mp166",
+                      "mp167",
+                      "mp168",
+                      "mp169",
+                      "mp170",
+                      "mp171",
+                      "mp172",
+                      "mp173",
+                      "mp174",
+                      "mp175",
+                      "mp176",
+                      "mp177",
+                      "mp178",
+                      "mp179",
+                      "mp180",
+                      "mp181",
+                      "mp182",
+                      "mp183",
+                      "mp184",
+                      "mp185",
+                      "mp186",
+                      "mp187",
+                      "mp188",
+                      "mp189",
+                      "mp190",
+                      "mp191",
+                      "mp192",
+                      "mp193",
+                      "mp194",
+                      "mp195",
+                      "mp196",
+                      "mp197",
+                      "mp198",
+                      "mp199",
+                      "mp200",
+                      "mp201",
+                      "mp202",
+                      "mp203",
+                      "mp204",
+                      "mp205",
+                      "mp206",
+                      "mp207",
+                      "mp208",
+                      "mp209",
+                      "mp210",
+                      "mp211",
+                      "mp212",
+                      "mp213",
+                      "mp214",
+                      "mp215",
+                      "mp216",
+                      "mp217",
+                      "mp218",
+                      "mp219",
+                      "mp220",
+                      "mp221",
+                      "mp222",
+                      "mp223",
+                      "mp224",
+                      "mp225",
+                      "mp226",
+                      "mp227",
+                      "mp228",
+                      "mp229",
+                      "mp230",
+                      "mp231",
+                      "mp232",
+                      "mp233",
+                      "mp234",
+                      "mp235",
+                      "mp236",
+                      "mp237",
+                      "mp238",
+                      "mp239",
+                      "mp240",
+                      "mp241",
+                      "mp242",
+                      "mp243",
+                      "mp244",
+                      "mp245",
+                      "mp246",
+                      "mp247",
+                      "mp248",
+                      "mp249",
+                      "mp250",
+                      "mp251",
+                      "mp252",
+                      "mp253",
+                      "mp254",
+                      "mp255"
+                    ],
+                    "type": "string"
+                  },
+                  "node": {
+                    "description": "The cluster node name.",
+                    "format": "pve-node",
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "size": {
+                    "description": "The new size. With the '+' sign the value is added to the actual size of the volume and without it, the value is taken as an absolute one. Shrinking disk size is not supported.",
+                    "pattern": "\\+?\\d+(\\.\\d+)?[KMGT]?",
+                    "type": "string"
+                  },
+                  "vmid": {
+                    "description": "The (unique) ID of the VM.",
+                    "format": "pve-vmid",
+                    "maximum": 999999999,
+                    "minimum": 100,
+                    "type": "integer",
+                    "typetext": "<integer> (100 - 999999999)"
+                  }
+                }
+              },
+              "permissions": {
+                "check": [
+                  "perm",
+                  "/vms/{vmid}",
+                  [
+                    "VM.Config.Disk"
+                  ],
+                  "any",
+                  1
+                ]
+              },
+              "protected": 1,
+              "proxyto": "node",
+              "returns": {
+                "description": "the task ID.",
+                "type": "string"
+              }
+            }
+          },
+          "leaf": 1,
+          "path": "/nodes/{node}/lxc/{vmid}/resize",
+          "text": "resize"
+        },
+        {
+          "info": {
+            "GET": {
+              "allowtoken": 1,
+              "description": "Get IP addresses of the specified container interface.",
+              "method": "GET",
+              "name": "ip",
+              "parameters": {
+                "additionalProperties": 0,
+                "properties": {
+                  "node": {
+                    "description": "The cluster node name.",
+                    "format": "pve-node",
+                    "type": "string",
+                    "typetext": "<string>"
+                  },
+                  "vmid": {
+                    "description": "The (unique) ID of the VM.",
+                    "format": "pve-vmid",
+                    "maximum": 999999999,
+                    "minimum": 100,
+                    "type": "integer",
+                    "typetext": "<integer> (100 - 999999999)"
+                  }
+                }
+              },
+              "permissions": {
+                "check": [
+                  "perm",
+                  "/vms/{vmid}",
+                  [
+                    "VM.Audit"
+                  ]
+                ]
+              },
+              "protected": 1,
+              "proxyto": "node",
+              "returns": {
+                "items": {
+                  "properties": {
+                    "hardware-address": {
+                      "description": "The MAC address of the interface",
+                      "optional": 0,
+                      "type": "string"
+                    },
+                    "hwaddr": {
+                      "description": "The MAC address of the interface",
+                      "optional": 0,
+                      "type": "string"
+                    },
+                    "inet": {
+                      "description": "The IPv4 address of the interface",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "inet6": {
+                      "description": "The IPv6 address of the interface",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "ip-addresses": {
+                      "description": "The addresses of the interface",
+                      "items": {
+                        "properties": {
+                          "ip-address": {
+                            "description": "IP-Address",
+                            "optional": 1,
+                            "type": "string"
+                          },
+                          "ip-address-type": {
+                            "description": "IP-Family",
+                            "optional": 1,
+                            "type": "string"
+                          },
+                          "prefix": {
+                            "description": "IP-Prefix",
+                            "optional": 1,
+                            "type": "integer"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "optional": 0,
+                      "type": "array"
+                    },
+                    "name": {
+                      "description": "The name of the interface",
+                      "optional": 0,
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "leaf": 1,
+          "path": "/nodes/{node}/lxc/{vmid}/interfaces",
+          "text": "interfaces"
+        }
+      ],
+      "info": {
+        "DELETE": {
+          "allowtoken": 1,
+          "description": "Destroy the container (also delete all uses files).",
+          "method": "DELETE",
+          "name": "destroy_vm",
+          "parameters": {
+            "additionalProperties": 0,
+            "properties": {
+              "destroy-unreferenced-disks": {
+                "description": "If set, destroy additionally all disks with the VMID from all enabled storages which are not referenced in the config.",
+                "optional": 1,
+                "type": "boolean",
+                "typetext": "<boolean>"
+              },
+              "force": {
+                "default": 0,
+                "description": "Force destroy, even if running.",
+                "optional": 1,
+                "type": "boolean",
+                "typetext": "<boolean>"
+              },
+              "node": {
+                "description": "The cluster node name.",
+                "format": "pve-node",
+                "type": "string",
+                "typetext": "<string>"
+              },
+              "purge": {
+                "default": 0,
+                "description": "Remove container from all related configurations. For example, backup jobs, replication jobs or HA. Related ACLs and Firewall entries will *always* be removed.",
+                "optional": 1,
+                "type": "boolean",
+                "typetext": "<boolean>"
+              },
+              "vmid": {
+                "description": "The (unique) ID of the VM.",
+                "format": "pve-vmid",
+                "maximum": 999999999,
+                "minimum": 100,
+                "type": "integer",
+                "typetext": "<integer> (100 - 999999999)"
+              }
+            }
+          },
+          "permissions": {
+            "check": [
+              "perm",
+              "/vms/{vmid}",
+              [
+                "VM.Allocate"
+              ]
+            ]
+          },
+          "protected": 1,
+          "proxyto": "node",
+          "returns": {
+            "type": "string"
+          }
+        },
+        "GET": {
+          "allowtoken": 1,
+          "description": "Directory index",
+          "method": "GET",
+          "name": "vmdiridx",
+          "parameters": {
+            "additionalProperties": 0,
+            "properties": {
+              "node": {
+                "description": "The cluster node name.",
+                "format": "pve-node",
+                "type": "string",
+                "typetext": "<string>"
+              },
+              "vmid": {
+                "description": "The (unique) ID of the VM.",
+                "format": "pve-vmid",
+                "maximum": 999999999,
+                "minimum": 100,
+                "type": "integer",
+                "typetext": "<integer> (100 - 999999999)"
+              }
+            }
+          },
+          "permissions": {
+            "user": "all"
+          },
+          "proxyto": "node",
+          "returns": {
+            "items": {
+              "properties": {
+                "subdir": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "links": [
+              {
+                "href": "{subdir}",
+                "rel": "child"
+              }
+            ],
+            "type": "array"
+          }
+        }
+      },
+      "leaf": 0,
+      "path": "/nodes/{node}/lxc/{vmid}",
+      "text": "{vmid}"
+    }
+  ],
+  "info": {
+    "GET": {
+      "allowtoken": 1,
+      "description": "LXC container index (per node).",
+      "method": "GET",
+      "name": "vmlist",
+      "parameters": {
+        "additionalProperties": 0,
+        "properties": {
+          "node": {
+            "description": "The cluster node name.",
+            "format": "pve-node",
+            "type": "string",
+            "typetext": "<string>"
+          }
+        }
+      },
+      "permissions": {
+        "description": "Only list CTs where you have VM.Audit permission on /vms/<vmid>.",
+        "user": "all"
+      },
+      "protected": 1,
+      "proxyto": "node",
+      "returns": {
+        "items": {
+          "properties": {
+            "cpu": {
+              "description": "Current CPU usage.",
+              "optional": 1,
+              "type": "number"
+            },
+            "cpus": {
+              "description": "Maximum usable CPUs.",
+              "optional": 1,
+              "type": "number"
+            },
+            "disk": {
+              "description": "Root disk image space-usage in bytes.",
+              "minimum": 0,
+              "optional": 1,
+              "renderer": "bytes",
+              "type": "integer"
+            },
+            "diskread": {
+              "description": "The amount of bytes the guest read from it's block devices since the guest was started. (Note: This info is not available for all storage types.)",
+              "optional": 1,
+              "renderer": "bytes",
+              "type": "integer"
+            },
+            "diskwrite": {
+              "description": "The amount of bytes the guest wrote from it's block devices since the guest was started. (Note: This info is not available for all storage types.)",
+              "optional": 1,
+              "renderer": "bytes",
+              "type": "integer"
+            },
+            "lock": {
+              "description": "The current config lock, if any.",
+              "optional": 1,
+              "type": "string"
+            },
+            "maxdisk": {
+              "description": "Root disk image size in bytes.",
+              "optional": 1,
+              "renderer": "bytes",
+              "type": "integer"
+            },
+            "maxmem": {
+              "description": "Maximum memory in bytes.",
+              "optional": 1,
+              "renderer": "bytes",
+              "type": "integer"
+            },
+            "maxswap": {
+              "description": "Maximum SWAP memory in bytes.",
+              "optional": 1,
+              "renderer": "bytes",
+              "type": "integer"
+            },
+            "mem": {
+              "description": "Currently used memory in bytes.",
+              "optional": 1,
+              "renderer": "bytes",
+              "type": "integer"
+            },
+            "name": {
+              "description": "Container name.",
+              "optional": 1,
+              "type": "string"
+            },
+            "netin": {
+              "description": "The amount of traffic in bytes that was sent to the guest over the network since it was started.",
+              "optional": 1,
+              "renderer": "bytes",
+              "type": "integer"
+            },
+            "netout": {
+              "description": "The amount of traffic in bytes that was sent from the guest over the network since it was started.",
+              "optional": 1,
+              "renderer": "bytes",
+              "type": "integer"
+            },
+            "status": {
+              "description": "LXC Container status.",
+              "enum": [
+                "stopped",
+                "running"
+              ],
+              "type": "string"
+            },
+            "tags": {
+              "description": "The current configured tags, if any.",
+              "optional": 1,
+              "type": "string"
+            },
+            "template": {
+              "default": 0,
+              "description": "Determines if the guest is a template.",
+              "optional": 1,
+              "type": "boolean"
+            },
+            "uptime": {
+              "description": "Uptime in seconds.",
+              "optional": 1,
+              "renderer": "duration",
+              "type": "integer"
+            },
+            "vmid": {
+              "description": "The (unique) ID of the VM.",
+              "format": "pve-vmid",
+              "maximum": 999999999,
+              "minimum": 100,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "links": [
+          {
+            "href": "{vmid}",
+            "rel": "child"
+          }
+        ],
+        "type": "array"
+      }
+    },
+    "POST": {
+      "allowtoken": 1,
+      "description": "Create or restore a container.",
+      "method": "POST",
+      "name": "create_vm",
+      "parameters": {
+        "additionalProperties": 0,
+        "properties": {
+          "arch": {
+            "default": "amd64",
+            "description": "OS architecture type.",
+            "enum": [
+              "amd64",
+              "i386",
+              "arm64",
+              "armhf",
+              "riscv32",
+              "riscv64"
+            ],
+            "optional": 1,
+            "type": "string"
+          },
+          "bwlimit": {
+            "default": "restore limit from datacenter or storage config",
+            "description": "Override I/O bandwidth limit (in KiB/s).",
+            "minimum": "0",
+            "optional": 1,
+            "type": "number",
+            "typetext": "<number> (0 - N)"
+          },
+          "cmode": {
+            "default": "tty",
+            "description": "Console mode. By default, the console command tries to open a connection to one of the available tty devices. By setting cmode to 'console' it tries to attach to /dev/console instead. If you set cmode to 'shell', it simply invokes a shell inside the container (no login).",
+            "enum": [
+              "shell",
+              "console",
+              "tty"
+            ],
+            "optional": 1,
+            "type": "string"
+          },
+          "console": {
+            "default": 1,
+            "description": "Attach a console device (/dev/console) to the container.",
+            "optional": 1,
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "cores": {
+            "description": "The number of cores assigned to the container. A container can use all available cores by default.",
+            "maximum": 8192,
+            "minimum": 1,
+            "optional": 1,
+            "type": "integer",
+            "typetext": "<integer> (1 - 8192)"
+          },
+          "cpulimit": {
+            "default": 0,
+            "description": "Limit of CPU usage.\n\nNOTE: If the computer has 2 CPUs, it has a total of '2' CPU time. Value '0' indicates no CPU limit.",
+            "maximum": 8192,
+            "minimum": 0,
+            "optional": 1,
+            "type": "number",
+            "typetext": "<number> (0 - 8192)"
+          },
+          "cpuunits": {
+            "default": "cgroup v1: 1024, cgroup v2: 100",
+            "description": "CPU weight for a container, will be clamped to [1, 10000] in cgroup v2.",
+            "maximum": 500000,
+            "minimum": 0,
+            "optional": 1,
+            "type": "integer",
+            "typetext": "<integer> (0 - 500000)",
+            "verbose_description": "CPU weight for a container. Argument is used in the kernel fair scheduler. The larger the number is, the more CPU time this container gets. Number is relative to the weights of all the other running guests."
+          },
+          "debug": {
+            "default": 0,
+            "description": "Try to be more verbose. For now this only enables debug log-level on start.",
+            "optional": 1,
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "description": {
+            "description": "Description for the Container. Shown in the web-interface CT's summary. This is saved as comment inside the configuration file.",
+            "maxLength": 8192,
+            "optional": 1,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "dev[n]": {
+            "description": "Device to pass through to the container",
+            "format": {
+              "deny-write": {
+                "default": 0,
+                "description": "Deny the container to write to the device",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "gid": {
+                "description": "Group ID to be assigned to the device node",
+                "minimum": 0,
+                "optional": 1,
+                "type": "integer"
+              },
+              "mode": {
+                "description": "Access mode to be set on the device node",
+                "format_description": "Octal access mode",
+                "optional": 1,
+                "pattern": "0[0-7]{3}",
+                "type": "string"
+              },
+              "path": {
+                "default_key": 1,
+                "description": "Device to pass through to the container",
+                "format": "pve-lxc-dev-string",
+                "format_description": "Path",
+                "optional": 1,
+                "type": "string",
+                "verbose_description": "Path to the device to pass through to the container"
+              },
+              "uid": {
+                "description": "User ID to be assigned to the device node",
+                "minimum": 0,
+                "optional": 1,
+                "type": "integer"
+              }
+            },
+            "optional": 1,
+            "type": "string",
+            "typetext": "[[path=]<Path>] [,deny-write=<1|0>] [,gid=<integer>] [,mode=<Octal access mode>] [,uid=<integer>]"
+          },
+          "features": {
+            "description": "Allow containers access to advanced features.",
+            "format": {
+              "force_rw_sys": {
+                "default": 0,
+                "description": "Mount /sys in unprivileged containers as `rw` instead of `mixed`. This can break networking under newer (>= v245) systemd-network use.",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "fuse": {
+                "default": 0,
+                "description": "Allow using 'fuse' file systems in a container. Note that interactions between fuse and the freezer cgroup can potentially cause I/O deadlocks.",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "keyctl": {
+                "default": 0,
+                "description": "For unprivileged containers only: Allow the use of the keyctl() system call. This is required to use docker inside a container. By default unprivileged containers will see this system call as non-existent. This is mostly a workaround for systemd-networkd, as it will treat it as a fatal error when some keyctl() operations are denied by the kernel due to lacking permissions. Essentially, you can choose between running systemd-networkd or docker.",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "mknod": {
+                "default": 0,
+                "description": "Allow unprivileged containers to use mknod() to add certain device nodes. This requires a kernel with seccomp trap to user space support (5.3 or newer). This is experimental.",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "mount": {
+                "description": "Allow mounting file systems of specific types. This should be a list of file system types as used with the mount command. Note that this can have negative effects on the container's security. With access to a loop device, mounting a file can circumvent the mknod permission of the devices cgroup, mounting an NFS file system can block the host's I/O completely and prevent it from rebooting, etc.",
+                "format_description": "fstype;fstype;...",
+                "optional": 1,
+                "pattern": "(?^:[a-zA-Z0-9_; ]+)",
+                "type": "string"
+              },
+              "nesting": {
+                "default": 0,
+                "description": "Allow nesting. Best used with unprivileged containers with additional id mapping. Note that this will expose procfs and sysfs contents of the host to the guest.",
+                "optional": 1,
+                "type": "boolean"
+              }
+            },
+            "optional": 1,
+            "type": "string",
+            "typetext": "[force_rw_sys=<1|0>] [,fuse=<1|0>] [,keyctl=<1|0>] [,mknod=<1|0>] [,mount=<fstype;fstype;...>] [,nesting=<1|0>]"
+          },
+          "force": {
+            "description": "Allow to overwrite existing container.",
+            "optional": 1,
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "hookscript": {
+            "description": "Script that will be executed during various steps in the containers lifetime.",
+            "format": "pve-volume-id",
+            "optional": 1,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "hostname": {
+            "description": "Set a host name for the container.",
+            "format": "dns-name",
+            "maxLength": 255,
+            "optional": 1,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "ignore-unpack-errors": {
+            "description": "Ignore errors when extracting the template.",
+            "optional": 1,
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "lock": {
+            "description": "Lock/unlock the container.",
+            "enum": [
+              "backup",
+              "create",
+              "destroyed",
+              "disk",
+              "fstrim",
+              "migrate",
+              "mounted",
+              "rollback",
+              "snapshot",
+              "snapshot-delete"
+            ],
+            "optional": 1,
+            "type": "string"
+          },
+          "memory": {
+            "default": 512,
+            "description": "Amount of RAM for the container in MB.",
+            "minimum": 16,
+            "optional": 1,
+            "type": "integer",
+            "typetext": "<integer> (16 - N)"
+          },
+          "mp[n]": {
+            "description": "Use volume as container mount point. Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.",
+            "format": {
+              "acl": {
+                "description": "Explicitly enable or disable ACL support.",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "backup": {
+                "description": "Whether to include the mount point in backups.",
+                "optional": 1,
+                "type": "boolean",
+                "verbose_description": "Whether to include the mount point in backups (only used for volume mount points)."
+              },
+              "mountoptions": {
+                "description": "Extra mount options for rootfs/mps.",
+                "format_description": "opt[;opt...]",
+                "optional": 1,
+                "pattern": "(?^:(?^:(discard|lazytime|noatime|nodev|noexec|nosuid))(;(?^:(discard|lazytime|noatime|nodev|noexec|nosuid)))*)",
+                "type": "string"
+              },
+              "mp": {
+                "description": "Path to the mount point as seen from inside the container (must not contain symlinks).",
+                "format": "pve-lxc-mp-string",
+                "format_description": "Path",
+                "type": "string",
+                "verbose_description": "Path to the mount point as seen from inside the container.\n\nNOTE: Must not contain any symlinks for security reasons."
+              },
+              "quota": {
+                "description": "Enable user quotas inside the container (not supported with zfs subvolumes)",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "replicate": {
+                "default": 1,
+                "description": "Will include this volume to a storage replica job.",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "ro": {
+                "description": "Read-only mount point",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "shared": {
+                "default": 0,
+                "description": "Mark this non-volume mount point as available on multiple nodes (see 'nodes')",
+                "optional": 1,
+                "type": "boolean",
+                "verbose_description": "Mark this non-volume mount point as available on all nodes.\n\nWARNING: This option does not share the mount point automatically, it assumes it is shared already!"
+              },
+              "size": {
+                "description": "Volume size (read only value).",
+                "format": "disk-size",
+                "format_description": "DiskSize",
+                "optional": 1,
+                "type": "string"
+              },
+              "volume": {
+                "default_key": 1,
+                "description": "Volume, device or directory to mount into the container.",
+                "format": "pve-lxc-mp-string",
+                "format_description": "volume",
+                "type": "string"
+              }
+            },
+            "optional": 1,
+            "type": "string",
+            "typetext": "[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
+          },
+          "nameserver": {
+            "description": "Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.",
+            "format": "lxc-ip-with-ll-iface-list",
+            "optional": 1,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "net[n]": {
+            "description": "Specifies network interfaces for the container.",
+            "format": {
+              "bridge": {
+                "description": "Bridge to attach the network device to.",
+                "format_description": "bridge",
+                "optional": 1,
+                "pattern": "[-_.\\w\\d]+",
+                "type": "string"
+              },
+              "firewall": {
+                "description": "Controls whether this interface's firewall rules should be used.",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "gw": {
+                "description": "Default gateway for IPv4 traffic.",
+                "format": "ipv4",
+                "format_description": "GatewayIPv4",
+                "optional": 1,
+                "type": "string"
+              },
+              "gw6": {
+                "description": "Default gateway for IPv6 traffic.",
+                "format": "ipv6",
+                "format_description": "GatewayIPv6",
+                "optional": 1,
+                "type": "string"
+              },
+              "hwaddr": {
+                "description": "The interface MAC address. This is dynamically allocated by default, but you can set that statically if needed, for example to always have the same link-local IPv6 address. (lxc.network.hwaddr)",
+                "format": "mac-addr",
+                "format_description": "XX:XX:XX:XX:XX:XX",
+                "optional": 1,
+                "type": "string",
+                "verbose_description": "A common MAC address with the I/G (Individual/Group) bit not set."
+              },
+              "ip": {
+                "description": "IPv4 address in CIDR format.",
+                "format": "pve-ipv4-config",
+                "format_description": "(IPv4/CIDR|dhcp|manual)",
+                "optional": 1,
+                "type": "string"
+              },
+              "ip6": {
+                "description": "IPv6 address in CIDR format.",
+                "format": "pve-ipv6-config",
+                "format_description": "(IPv6/CIDR|auto|dhcp|manual)",
+                "optional": 1,
+                "type": "string"
+              },
+              "link_down": {
+                "description": "Whether this interface should be disconnected (like pulling the plug).",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "mtu": {
+                "description": "Maximum transfer unit of the interface. (lxc.network.mtu)",
+                "maximum": 65535,
+                "minimum": 64,
+                "optional": 1,
+                "type": "integer"
+              },
+              "name": {
+                "description": "Name of the network device as seen from inside the container. (lxc.network.name)",
+                "format_description": "string",
+                "pattern": "[-_.\\w\\d]+",
+                "type": "string"
+              },
+              "rate": {
+                "description": "Apply rate limiting to the interface",
+                "format_description": "mbps",
+                "optional": 1,
+                "type": "number"
+              },
+              "tag": {
+                "description": "VLAN tag for this interface.",
+                "maximum": 4094,
+                "minimum": 1,
+                "optional": 1,
+                "type": "integer"
+              },
+              "trunks": {
+                "description": "VLAN ids to pass through the interface",
+                "format_description": "vlanid[;vlanid...]",
+                "optional": 1,
+                "pattern": "(?^:\\d+(?:;\\d+)*)",
+                "type": "string"
+              },
+              "type": {
+                "description": "Network interface type.",
+                "enum": [
+                  "veth"
+                ],
+                "optional": 1,
+                "type": "string"
+              }
+            },
+            "optional": 1,
+            "type": "string",
+            "typetext": "name=<string> [,bridge=<bridge>] [,firewall=<1|0>] [,gw=<GatewayIPv4>] [,gw6=<GatewayIPv6>] [,hwaddr=<XX:XX:XX:XX:XX:XX>] [,ip=<(IPv4/CIDR|dhcp|manual)>] [,ip6=<(IPv6/CIDR|auto|dhcp|manual)>] [,link_down=<1|0>] [,mtu=<integer>] [,rate=<mbps>] [,tag=<integer>] [,trunks=<vlanid[;vlanid...]>] [,type=<veth>]"
+          },
+          "node": {
+            "description": "The cluster node name.",
+            "format": "pve-node",
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "onboot": {
+            "default": 0,
+            "description": "Specifies whether a container will be started during system bootup.",
+            "optional": 1,
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "ostemplate": {
+            "description": "The OS template or backup file.",
+            "maxLength": 255,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "ostype": {
+            "description": "OS type. This is used to setup configuration inside the container, and corresponds to lxc setup scripts in /usr/share/lxc/config/<ostype>.common.conf. Value 'unmanaged' can be used to skip and OS specific setup.",
+            "enum": [
+              "debian",
+              "devuan",
+              "ubuntu",
+              "centos",
+              "fedora",
+              "opensuse",
+              "archlinux",
+              "alpine",
+              "gentoo",
+              "nixos",
+              "unmanaged"
+            ],
+            "optional": 1,
+            "type": "string"
+          },
+          "password": {
+            "description": "Sets root password inside container.",
+            "minLength": 5,
+            "optional": 1,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "pool": {
+            "description": "Add the VM to the specified pool.",
+            "format": "pve-poolid",
+            "optional": 1,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "protection": {
+            "default": 0,
+            "description": "Sets the protection flag of the container. This will prevent the CT or CT's disk remove/update operation.",
+            "optional": 1,
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "restore": {
+            "description": "Mark this as restore task.",
+            "optional": 1,
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "rootfs": {
+            "description": "Use volume as container root.",
+            "format": {
+              "acl": {
+                "description": "Explicitly enable or disable ACL support.",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "mountoptions": {
+                "description": "Extra mount options for rootfs/mps.",
+                "format_description": "opt[;opt...]",
+                "optional": 1,
+                "pattern": "(?^:(?^:(discard|lazytime|noatime|nodev|noexec|nosuid))(;(?^:(discard|lazytime|noatime|nodev|noexec|nosuid)))*)",
+                "type": "string"
+              },
+              "quota": {
+                "description": "Enable user quotas inside the container (not supported with zfs subvolumes)",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "replicate": {
+                "default": 1,
+                "description": "Will include this volume to a storage replica job.",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "ro": {
+                "description": "Read-only mount point",
+                "optional": 1,
+                "type": "boolean"
+              },
+              "shared": {
+                "default": 0,
+                "description": "Mark this non-volume mount point as available on multiple nodes (see 'nodes')",
+                "optional": 1,
+                "type": "boolean",
+                "verbose_description": "Mark this non-volume mount point as available on all nodes.\n\nWARNING: This option does not share the mount point automatically, it assumes it is shared already!"
+              },
+              "size": {
+                "description": "Volume size (read only value).",
+                "format": "disk-size",
+                "format_description": "DiskSize",
+                "optional": 1,
+                "type": "string"
+              },
+              "volume": {
+                "default_key": 1,
+                "description": "Volume, device or directory to mount into the container.",
+                "format": "pve-lxc-mp-string",
+                "format_description": "volume",
+                "type": "string"
+              }
+            },
+            "optional": 1,
+            "type": "string",
+            "typetext": "[volume=]<volume> [,acl=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
+          },
+          "searchdomain": {
+            "description": "Sets DNS search domains for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.",
+            "format": "dns-name-list",
+            "optional": 1,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "ssh-public-keys": {
+            "description": "Setup public SSH keys (one key per line, OpenSSH format).",
+            "optional": 1,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "start": {
+            "default": 0,
+            "description": "Start the CT after its creation finished successfully.",
+            "optional": 1,
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "startup": {
+            "description": "Startup and shutdown behavior. Order is a non-negative number defining the general startup order. Shutdown in done with reverse ordering. Additionally you can set the 'up' or 'down' delay in seconds, which specifies a delay to wait before the next VM is started or stopped.",
+            "format": "pve-startup-order",
+            "optional": 1,
+            "type": "string",
+            "typetext": "[[order=]\\d+] [,up=\\d+] [,down=\\d+] "
+          },
+          "storage": {
+            "default": "local",
+            "description": "Default Storage.",
+            "format": "pve-storage-id",
+            "format_description": "storage ID",
+            "optional": 1,
+            "type": "string",
+            "typetext": "<storage ID>"
+          },
+          "swap": {
+            "default": 512,
+            "description": "Amount of SWAP for the container in MB.",
+            "minimum": 0,
+            "optional": 1,
+            "type": "integer",
+            "typetext": "<integer> (0 - N)"
+          },
+          "tags": {
+            "description": "Tags of the Container. This is only meta information.",
+            "format": "pve-tag-list",
+            "optional": 1,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "template": {
+            "default": 0,
+            "description": "Enable/disable Template.",
+            "optional": 1,
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "timezone": {
+            "description": "Time zone to use in the container. If option isn't set, then nothing will be done. Can be set to 'host' to match the host time zone, or an arbitrary time zone option from /usr/share/zoneinfo/zone.tab",
+            "format": "pve-ct-timezone",
+            "optional": 1,
+            "type": "string",
+            "typetext": "<string>"
+          },
+          "tty": {
+            "default": 2,
+            "description": "Specify the number of tty available to the container",
+            "maximum": 6,
+            "minimum": 0,
+            "optional": 1,
+            "type": "integer",
+            "typetext": "<integer> (0 - 6)"
+          },
+          "unique": {
+            "description": "Assign a unique random ethernet address.",
+            "optional": 1,
+            "requires": "restore",
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "unprivileged": {
+            "default": 0,
+            "description": "Makes the container run as unprivileged user. (Should not be modified manually.)",
+            "optional": 1,
+            "type": "boolean",
+            "typetext": "<boolean>"
+          },
+          "unused[n]": {
+            "description": "Reference to unused volumes. This is used internally, and should not be modified manually.",
+            "format": {
+              "volume": {
+                "default_key": 1,
+                "description": "The volume that is not used currently.",
+                "format": "pve-volume-id",
+                "format_description": "volume",
+                "type": "string"
+              }
+            },
+            "optional": 1,
+            "type": "string",
+            "typetext": "[volume=]<volume>"
+          },
+          "vmid": {
+            "description": "The (unique) ID of the VM.",
+            "format": "pve-vmid",
+            "maximum": 999999999,
+            "minimum": 100,
+            "type": "integer",
+            "typetext": "<integer> (100 - 999999999)"
+          }
+        }
+      },
+      "permissions": {
+        "description": "You need 'VM.Allocate' permission on /vms/{vmid} or on the VM pool /pool/{pool}. For restore, it is enough if the user has 'VM.Backup' permission and the VM already exists. You also need 'Datastore.AllocateSpace' permissions on the storage.",
+        "user": "all"
+      },
+      "protected": 1,
+      "proxyto": "node",
+      "returns": {
+        "type": "string"
+      }
+    }
+  },
+  "leaf": 0,
+  "path": "/nodes/{node}/lxc",
+  "text": "lxc"
+}

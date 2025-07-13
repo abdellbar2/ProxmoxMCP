@@ -34,6 +34,28 @@ class VMCommand(BaseModel):
     vmid: Annotated[str, Field(description="VM ID number (e.g. '100', '101')")]
     command: Annotated[str, Field(description="Shell command to run (e.g. 'uname -a', 'systemctl status nginx')")]
 
+class VMPowerOperation(BaseModel):
+    """Model for VM power operation parameters.
+    
+    Validates and documents the required parameters for
+    VM power operations (start, stop, shutdown, reboot).
+    """
+    node: Annotated[str, Field(description="Target node name (e.g. 'pve1', 'proxmox-node2')")]
+    vmid: Annotated[str, Field(description="VM ID number (e.g. '100', '101')")]
+
+class VMConfigUpdate(BaseModel):
+    """Model for VM configuration update parameters.
+    
+    Validates and documents the parameters for
+    updating VM configuration settings.
+    """
+    node: Annotated[str, Field(description="Target node name (e.g. 'pve1', 'proxmox-node2')")]
+    vmid: Annotated[str, Field(description="VM ID number (e.g. '100', '101')")]
+    cores: Optional[int] = Field(None, description="CPU cores (e.g. 2, 4, 8)")
+    memory: Optional[int] = Field(None, description="Memory in MB (e.g. 2048, 4096)")
+    name: Optional[str] = Field(None, description="VM name (e.g. 'ubuntu-server')")
+    description: Optional[str] = Field(None, description="VM description")
+
 class ProxmoxConfig(BaseModel):
     """Model for Proxmox connection configuration.
     
