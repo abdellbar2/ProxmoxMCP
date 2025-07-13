@@ -1,22 +1,32 @@
 # 🚀 Proxmox Manager - Proxmox MCP Server
 
+> **Fork Notice:**
+> 
+> This project is a **fork** of the original [canvrno/ProxmoxMCP](https://github.com/canvrno/ProxmoxMCP) repository. It adds comprehensive LXC container management tools and other enhancements. All credit for the original architecture and VM/node/storage/cluster features goes to the upstream authors.
+
 ![ProxmoxMCP](https://github.com/user-attachments/assets/e32ab79f-be8a-420c-ab2d-475612150534)
 
 A Python-based Model Context Protocol (MCP) server for interacting with Proxmox hypervisors, providing a clean interface for managing nodes, VMs, and containers.
 
 ## 🏗️ Built With
 
-- [Cline](https://github.com/cline/cline) - Autonomous coding agent - Go faster with Cline.
+
 - [Proxmoxer](https://github.com/proxmoxer/proxmoxer) - Python wrapper for Proxmox API
 - [MCP SDK](https://github.com/modelcontextprotocol/sdk) - Model Context Protocol SDK
 - [Pydantic](https://docs.pydantic.dev/) - Data validation using Python type annotations
 
 ## ✨ Features
 
-- 🤖 Full integration with Cline
+
 - 🛠️ Built with the official MCP SDK
 - 🔒 Secure token-based authentication with Proxmox
 - 🖥️ Tools for managing nodes and VMs
+- 📦 **Comprehensive LXC container management** (NEW!)
+  - Create, start, stop, shutdown, reboot, suspend, resume containers
+  - Get and update container configuration
+  - Execute commands inside containers
+  - Clone and destroy containers
+  - Manage container snapshots (create, delete, rollback)
 - 💻 VM console command execution
 - 📝 Configurable logging system
 - ✅ Type-safe implementation with Pydantic
@@ -146,199 +156,43 @@ source .venv/bin/activate  # Linux/macOS
 python -m proxmox_mcp.server
 ```
 
-### Cline Desktop Integration
 
-For Cline users, add this configuration to your MCP settings file (typically at `~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`):
 
-```json
-{
-    "mcpServers": {
-        "github.com/canvrno/ProxmoxMCP": {
-            "command": "/absolute/path/to/ProxmoxMCP/.venv/bin/python",
-            "args": ["-m", "proxmox_mcp.server"],
-            "cwd": "/absolute/path/to/ProxmoxMCP",
-            "env": {
-                "PYTHONPATH": "/absolute/path/to/ProxmoxMCP/src",
-                "PROXMOX_MCP_CONFIG": "/absolute/path/to/ProxmoxMCP/proxmox-config/config.json",
-                "PROXMOX_HOST": "your-proxmox-host",
-                "PROXMOX_USER": "username@pve",
-                "PROXMOX_TOKEN_NAME": "token-name",
-                "PROXMOX_TOKEN_VALUE": "token-value",
-                "PROXMOX_PORT": "8006",
-                "PROXMOX_VERIFY_SSL": "false",
-                "PROXMOX_SERVICE": "PVE",
-                "LOG_LEVEL": "DEBUG"
-            },
-            "disabled": false,
-            "autoApprove": []
-        }
-    }
-}
-```
 
-To help generate the correct paths, you can use this command:
-```bash
-# This will print the MCP settings with your absolute paths filled in
-python -c "import os; print(f'''{{
-    \"mcpServers\": {{
-        \"github.com/canvrno/ProxmoxMCP\": {{
-            \"command\": \"{os.path.abspath('.venv/bin/python')}\",
-            \"args\": [\"-m\", \"proxmox_mcp.server\"],
-            \"cwd\": \"{os.getcwd()}\",
-            \"env\": {{
-                \"PYTHONPATH\": \"{os.path.abspath('src')}\",
-                \"PROXMOX_MCP_CONFIG\": \"{os.path.abspath('proxmox-config/config.json')}\",
-                ...
-            }}
-        }}
-    }}
-}}''')"
-```
-
-Important:
-- All paths must be absolute
-- The Python interpreter must be from your virtual environment
-- The PYTHONPATH must point to the src directory
-- Restart VSCode after updating MCP settings
 
 # 🔧 Available Tools
 
 The server provides the following MCP tools for interacting with Proxmox:
 
-### get_nodes
-Lists all nodes in the Proxmox cluster.
+## Node & Cluster Tools
+- `get_nodes`: List all nodes in the cluster
+- `get_node_status`: Get detailed status of a node
+- `get_cluster_status`: Get overall cluster health and configuration
 
-- Parameters: None
-- Example Response:
-  ```
-  🖥️ Proxmox Nodes
+## VM Tools
+- `get_vms`: List all VMs
+- `create_vm`: Create a new VM
+- `start_vm`, `stop_vm`, `shutdown_vm`, `reboot_vm`: VM lifecycle
+- `get_vm_config`, `update_vm_config`: VM configuration
+- `execute_vm_command`: Run commands in a VM (QEMU Guest Agent)
 
-  🖥️ pve-compute-01
-    • Status: ONLINE
-    • Uptime: ⏳ 156d 12h
-    • CPU Cores: 64
-    • Memory: 186.5 GB / 512.0 GB (36.4%)
+## **LXC Container Tools (NEW)**
+- `get_containers`: List all LXC containers
+- `create_container`: Create a new LXC container from a template
+- `start_container`, `stop_container`, `shutdown_container`, `reboot_container`, `suspend_container`, `resume_container`: Full container lifecycle
+- `get_container_config`, `update_container_config`: Get/update container configuration
+- `execute_container_command`: Run commands inside a container
+- `clone_container`: Clone an existing container
+- `destroy_container`: Destroy a container
+- `get_container_snapshots`: List container snapshots
+- `create_container_snapshot`: Create a snapshot
+- `delete_container_snapshot`: Delete a snapshot
+- `rollback_container_snapshot`: Rollback to a snapshot
 
-  🖥️ pve-compute-02
-    • Status: ONLINE
-    • Uptime: ⏳ 156d 11h
-    • CPU Cores: 64
-    • Memory: 201.3 GB / 512.0 GB (39.3%)
-  ```
+## Storage Tools
+- `get_storage`: List available storage pools
 
-### get_node_status
-Get detailed status of a specific node.
-
-- Parameters:
-  - `node` (string, required): Name of the node
-- Example Response:
-  ```
-  🖥️ Node: pve-compute-01
-    • Status: ONLINE
-    • Uptime: ⏳ 156d 12h
-    • CPU Usage: 42.3%
-    • CPU Cores: 64 (AMD EPYC 7763)
-    • Memory: 186.5 GB / 512.0 GB (36.4%)
-    • Network: ⬆️ 12.8 GB/s ⬇️ 9.2 GB/s
-    • Temperature: 38°C
-  ```
-
-### get_vms
-List all VMs across the cluster.
-
-- Parameters: None
-- Example Response:
-  ```
-  🗃️ Virtual Machines
-
-  🗃️ prod-db-master (ID: 100)
-    • Status: RUNNING
-    • Node: pve-compute-01
-    • CPU Cores: 16
-    • Memory: 92.3 GB / 128.0 GB (72.1%)
-
-  🗃️ prod-web-01 (ID: 102)
-    • Status: RUNNING
-    • Node: pve-compute-01
-    • CPU Cores: 8
-    • Memory: 12.8 GB / 32.0 GB (40.0%)
-  ```
-
-### get_storage
-List available storage.
-
-- Parameters: None
-- Example Response:
-  ```
-  💾 Storage Pools
-
-  💾 ceph-prod
-    • Status: ONLINE
-    • Type: rbd
-    • Usage: 12.8 TB / 20.0 TB (64.0%)
-    • IOPS: ⬆️ 15.2k ⬇️ 12.8k
-
-  💾 local-zfs
-    • Status: ONLINE
-    • Type: zfspool
-    • Usage: 3.2 TB / 8.0 TB (40.0%)
-    • IOPS: ⬆️ 42.8k ⬇️ 35.6k
-  ```
-
-### get_cluster_status
-Get overall cluster status.
-
-- Parameters: None
-- Example Response:
-  ```
-  ⚙️ Proxmox Cluster
-
-    • Name: enterprise-cloud
-    • Status: HEALTHY
-    • Quorum: OK
-    • Nodes: 4 ONLINE
-    • Version: 8.1.3
-    • HA Status: ACTIVE
-    • Resources:
-      - Total CPU Cores: 192
-      - Total Memory: 1536 GB
-      - Total Storage: 70 TB
-    • Workload:
-      - Running VMs: 7
-      - Total VMs: 8
-      - Average CPU Usage: 38.6%
-      - Average Memory Usage: 42.8%
-  ```
-
-### execute_vm_command
-Execute a command in a VM's console using QEMU Guest Agent.
-
-- Parameters:
-  - `node` (string, required): Name of the node where VM is running
-  - `vmid` (string, required): ID of the VM
-  - `command` (string, required): Command to execute
-- Example Response:
-  ```
-  🔧 Console Command Result
-    • Status: SUCCESS
-    • Command: systemctl status nginx
-    • Node: pve-compute-01
-    • VM: prod-web-01 (ID: 102)
-
-  Output:
-  ● nginx.service - A high performance web server and a reverse proxy server
-     Loaded: loaded (/lib/systemd/system/nginx.service; enabled; vendor preset: enabled)
-     Active: active (running) since Tue 2025-02-18 15:23:45 UTC; 2 months 3 days ago
-  ```
-- Requirements:
-  - VM must be running
-  - QEMU Guest Agent must be installed and running in the VM
-  - Command execution permissions must be enabled in the Guest Agent
-- Error Handling:
-  - Returns error if VM is not running
-  - Returns error if VM is not found
-  - Returns error if command execution fails
-  - Includes command output even if command returns non-zero exit code
+---
 
 ## 👨‍💻 Development
 
